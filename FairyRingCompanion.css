@@ -1,0 +1,34 @@
+#board{
+  position: absolute;
+  width: 337px;
+  height: 303px;
+  left: 50%;
+  margin-left: -171px;
+  background-image: url("https://cdn.rawgit.com/LudensCogitet/Files/c74439f9/BoardGifs/Board.gif");
+}
+
+#riverTile{
+  position: absolute;
+  width: 93px;
+  height: 109px;
+  top: 320px;
+  left: 50%;
+  margin-left: -49px;
+  background-image: url("https://cdn.rawgit.com/LudensCogitet/Files/4c0c372c/BoardGifs/River.gif");
+}
+
+#buttons{
+  position: absolute;
+  width: 100%;
+  height: 20px;
+  top: 365px;
+}
+
+#generate{
+  float: right;
+   margin-right: 18px;
+}
+
+#reset{
+  float: left;
+}
