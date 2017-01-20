@@ -24,11 +24,11 @@
   top: 365px;
 }
 
-/*#generate{
-  float: right;
+#generate{
+   float: right;
    margin-right: 18px;
 }
 
 #reset{
   float: left;
-}*/
+}
