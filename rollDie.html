@@ -1,0 +1,158 @@
+<head>
+<script src="jquery-3.1.1.min.js"></script>
+<link rel="stylesheet" type="text/css" href="./rollDie.css">
+</head>
+<div class="container"><canvas id="canvas" width="300px" height="300px"></div>
+
+<script>
+  // Simple function to convert an angle from degrees to radians.
+function toRadians(angle) {
+  return angle * (Math.PI / 180);
+}
+
+var context = document.getElementById("canvas").getContext("2d");
+
+function draw(num) {
+  var size = 30;
+  window.requestAnimationFrame(function() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.beginPath();
+
+    switch(num){
+      case 0:
+        context.beginPath();
+        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+      break;
+      case 1:
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+      break;
+      case 2:
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+      break;
+      case 3:
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+      break;
+      case 4:
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+      break;
+      case 5:
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 2, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 2, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+      break;
+    }
+  });
+}
+
+function roll(){
+  var randoms = [];
+  var newRand = Math.floor(Math.random()*6);
+  randoms.push(newRand);
+  
+  do{
+    newRand = Math.floor(Math.random()*6);
+  }while(newRand == randoms[randoms.length-1]);
+  randoms.push(newRand);
+  
+  for(var i = 2; i < 10; i++){
+    do{
+      newRand = Math.floor(Math.random()*6);
+    }while(newRand == randoms[randoms.length-1] || newRand == randoms[randoms.length-2]);
+      
+    randoms.push(newRand);
+  }
+
+  var delay = 100;
+  var i = 0;
+  
+  function loop(){
+    draw(randoms[i]);
+    i++;
+    
+    if(i < randoms.length-1){
+      setTimeout(loop,delay);
+    }
+  }
+  loop();
+}
+
+$(document).ready(function(){
+  roll();
+  $("#canvas").click(roll);
+});
+  </script>
