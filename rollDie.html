@@ -19,29 +19,15 @@ function draw(num) {
     context.beginPath();
 
     switch(num){
-      case 0:
-        context.beginPath();
-        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
-        context.fill();
-        context.closePath();
-      break;
       case 1:
         context.beginPath();
-        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
-        context.fill();
-        context.closePath();
-        context.beginPath();
-        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
         context.fill();
         context.closePath();
       break;
       case 2:
         context.beginPath();
         context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
-        context.fill();
-        context.closePath();
-        context.beginPath();
-        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
         context.fill();
         context.closePath();
         context.beginPath();
@@ -55,11 +41,7 @@ function draw(num) {
         context.fill();
         context.closePath();
         context.beginPath();
-        context.arc(canvas.width / 4, canvas.height / 4*3, size, 0, toRadians(360));
-        context.fill();
-        context.closePath();
-        context.beginPath();
-        context.arc(canvas.width / 4*3, canvas.height / 4, size, 0, toRadians(360));
+        context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
         context.fill();
         context.closePath();
         context.beginPath();
@@ -84,12 +66,30 @@ function draw(num) {
         context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
         context.fill();
         context.closePath();
+      break;
+      case 5:
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
+        context.beginPath();
+        context.arc(canvas.width / 4*3, canvas.height / 4*3, size, 0, toRadians(360));
+        context.fill();
+        context.closePath();
         context.beginPath();
         context.arc(canvas.width / 2, canvas.height / 2, size, 0, toRadians(360));
         context.fill();
         context.closePath();
       break;
-      case 5:
+      case 6:
         context.beginPath();
         context.arc(canvas.width / 4, canvas.height / 4, size, 0, toRadians(360));
         context.fill();
