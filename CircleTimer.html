@@ -1,0 +1,29 @@
+<head>
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="CircleTimer.css">
+<script src="jquery-3.1.1.min.js"></script>
+<script src="CircleTimer.js"></script>
+</head>
+<body>
+<div style="text-align: center;">
+  <div style="width:550px; height: 600px; position: relative; display: inline-block;">
+    <div id="help" class="button fadeOut" style="position: absolute; right: 0;">?</div>
+    <div>
+      <canvas id="canvas" width="400" height="400" style="clear: both;"></canvas>
+    </div>
+    <div class="console fadeOut" style="float: left;">
+      <div class="button active rest minus">-</div>
+      <div class="consoleDisplay rest">5</div>
+      <div class="button rest plus active">+</div>
+      <div class="textOutline" style="color: #3ddff4; font-size: 1.5em;">Rest</div>
+    </div>
+    <div id="reset" class="button active fadeOut">&#8634;</div>
+    <div class="console fadeOut" style="float: right;">
+      <div class="button active work minus">-</div>
+      <div class="consoleDisplay work">25</div>
+      <div class="button active work plus" style="margin-right: -1px;">+</div>
+      <div class="textOutline" style="color: #3df449; font-size: 1.5em;">Work</div>
+    </div>
+  </div>
+</div>
+</body>
