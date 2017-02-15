@@ -9,17 +9,23 @@
 </div>
 
 <script>
-  var now = new Date();
+  function weekdaysFromTo(from,to){
+  	var dayInMili = 1000*60*60*24;
+    var daysLeft = 0;
+
+  	while(from.getMonth() != to.getMonth() || from.getDate() != to.getDate()){
+    	console.log("bing",from.getMonth(),to.getMonth())
+      from.setTime(from.getTime()+dayInMili);
+    	
+      if(from.getDay() != 0 && from.getDay() != 6)
+     	 daysLeft++;
+  	}
+    return daysLeft;
+  }
+  
   var johnBD = new Date(2017,06,29,0,0,0);
   var isidoreFD = new Date(2017,03,04,0,0,0);
-  
-  var daysTilBD = johnBD - now;
-  daysTilBD = daysTilBD / 1000 / 60 / 60 / 24;
-  daysTilBD = Math.floor(daysTilBD);
-  var daysTilFD = isidoreFD - now;
-  daysTilFD = daysTilFD / 1000 / 60 / 60 / 24;
-  daysTilFD = Math.floor(daysTilFD);
-  
-  document.getElementById("tilBD").innerHTML = daysTilBD;
-  document.getElementById("tilFD").innerHTML = daysTilFD;
+
+  document.getElementById("tilBD").innerHTML = weekdaysFromTo(new Date(),johnBD);
+  document.getElementById("tilFD").innerHTML = weekdaysFromTo(new Date(),isidoreFD);
 </script>
