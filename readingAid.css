@@ -1,0 +1,41 @@
+#container{
+  font-size: 2em;
+}
+
+.quizButton{
+  border: 2px solid black;
+  border-radius: 5px;
+  text-align: center;
+  width: 200px;
+  cursor: pointer;
+}
+
+.quizButton:hover{
+  color: white;
+  background-color: black;
+}
+
+#setsDisplayContainer{
+  position: absolute;
+  bottom: 0px;
+  left: -400px;
+  width: 800px;
+  margin-left: 50%;
+  white-space: nowrap;
+  border: 2px solid black;
+  height: 126px;
+  overflow-x: auto;
+}
+
+.setBoxDisplay{
+  text-align: center;
+  padding: 4px;
+  display: inline-block;
+  border: 2px solid black;
+  margin: 2px;
+}
+
+.setBoxItem{
+  border-bottom: 1px solid black;
+  margin-bottom: 5px;
+}
