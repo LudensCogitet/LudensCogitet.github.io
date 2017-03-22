@@ -135,16 +135,41 @@ function SentenceSet(texts){
 function SetGenerator(homeEl,setEditor,setsDisplay){
   var currentSet = null;
   var sets = [];
-  
+  var loadedSets = null;
+	
   var textField = $("<input type='text'>");
-  var addButton = $("<button>New</button>");
-  var saveButton = $("<button>Save</button>");
+  var newButton = $("<button>New</button>");
+  var addButton = $("<button>Add</button>");
+	
+	if(!hasLocalStorage()){
+    alert("Saving is unavailable. Please allow 3rd party cookies in your browser settings and refresh this page to allow saving.");
+  }
+  else{
+		var saveCheckbox = $("<input type='checkbox' id='saveCheckbox'></input>");
+		let saveGroup = $("<span id='saveSets'>cards saved</span>");
+		saveCheckbox.click(function(){
+			if(sets.length > 0)
+				localStorage.setItem("savedSets",stringifySets());
+			else{
+				if(localStorage.getItem("savedSets") !== null)
+					localStorage.removeItem("savedSets");
+			}
+		});
+		saveGroup.append(saveCheckbox);
+    $("html").prepend(saveGroup);
+		
+		window.onbeforeunload = function(){
+    if(localStorage.getItem("savedSets") === null && sets.length !== 0 || loadedSets != JSON.stringify(sets) && saveCheckbox.prop("checked") === false)
+			return "Are you sure? The current set of flash cards has changed since the last save.";
+		}
+  }
   
   var leftButton = $("<button class='leftButton' style='width: 25px;'>&#8592;</button>");
   leftButton.click(function(){
         let myBox = $(this).parent();
         let index = myBox.prevAll(".setBoxDisplay").length;
         if(index > 0){
+					saveCheckbox.prop('checked',false);
           let oldLeft = myBox.prev(".setBoxDisplay");
           myBox.detach();
           oldLeft.before(myBox);
@@ -161,6 +186,7 @@ function SetGenerator(homeEl,setEditor,setsDisplay){
         let index = myBox.prevAll(".setBoxDisplay").length;
         let numNextBoxs = myBox.nextAll(".setBoxDisplay").length;
         if(numNextBoxs > 0){
+					saveCheckbox.prop('checked',false);
           let oldRight = myBox.next(".setBoxDisplay");
           myBox.detach();
           oldRight.after(myBox);
@@ -173,12 +199,13 @@ function SetGenerator(homeEl,setEditor,setsDisplay){
   
   var deleteButton = $("<button class='deleteButton' style='width: 60px;'>Delete</button>");
   deleteButton.click(function(){
+				saveCheckbox.prop('checked',false);
         let index = $(this).parent().prevAll(".setBoxDisplay").length;
         sets.splice(index,1);
         $(this).parent().remove();
       });
   
-  addButton.click(function(){
+  newButton.click(function(){
     if(textField.val().length > 0){
       currentSet = [new Sentence(textField.val()),
                     new Sentence(textField.val()),
@@ -192,7 +219,8 @@ function SetGenerator(homeEl,setEditor,setsDisplay){
     }
   });
   
-  saveButton.click(function(){
+  addButton.click(function(){
+		saveCheckbox.prop('checked',false);
     if(currentSet != null){
       addToDisplay(currentSet);
       
@@ -217,8 +245,8 @@ function SetGenerator(homeEl,setEditor,setsDisplay){
   }
   
   homeEl.append(textField);
+  homeEl.append(newButton);
   homeEl.append(addButton);
-  homeEl.append(saveButton);
   
   this.getSets = function(){
     var arr = [];
@@ -241,8 +269,12 @@ function SetGenerator(homeEl,setEditor,setsDisplay){
     sets = [];
   }
   
-  this.stringifySets = function(){
-    var stringify = [];
+  function stringifySets(){
+    
+		if(sets.length == 0)
+			return null;
+		
+		var stringify = [];
     
     for(let i = 0; i < sets.length; i++){
       var stringSet = [];
@@ -255,11 +287,13 @@ function SetGenerator(homeEl,setEditor,setsDisplay){
   }
   
   this.loadStringifiedSets = function(textArray){
-    textArray = JSON.parse(textArray);
+    loadedSets = textArray;
+		textArray = JSON.parse(textArray);
+		console.log(textArray);
     sets = [];
     for(let i = 0; i < textArray.length; i++){
       var newSet = [];
-      for(let d = 0; d < textArray[i]; d++){
+      for(let d = 0; d < textArray[i].length; d++){
         newSet.push(new Sentence(textArray[i][d]));
       }
       sets.push(newSet);
@@ -274,6 +308,7 @@ function hasLocalStorage(){
     console.log(localStorage.getItem("savedSets"));
     localStorage.setItem(test,test);
     if(localStorage.getItem(test) == "test"){
+			console.log(localStorage.getItem(test));
       localStorage.removeItem(test);
     }
     return true;
@@ -342,7 +377,7 @@ $(document).ready(function(){
   });
   
   $("#next").click(function(){
-    if(currentCard < cards.length){
+		if(currentCard < cards.length){
       currentCard++;
       
       if(currentCard == cards.length -1){
@@ -358,19 +393,4 @@ $(document).ready(function(){
       playReturn = cards[currentCard].play($("#container"),displayTime);
     }
   });
-  
-  if(!hasLocalStorage()){
-    alert("Saving is unavailable. Please allow 3rd party cookies in your browser settings and refresh this page to allow saving.");
-  }
-  else{
-    $("html").prepend($("<input type='checkbox' id='saveData' style='float:right;'></input><span style='float:right'>Save on close</span>"));
-  }
-  
-  window.onbeforeunload = function(){
-    return "are you sure?";
-    if($("#saveData").prop("checked")){
-      alert("YEP");
-      localStorage.setItem("savedSets",generator.stringifySets());
-    }
-  }
 });
