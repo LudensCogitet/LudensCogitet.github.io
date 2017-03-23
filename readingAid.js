@@ -129,7 +129,7 @@ function FlashCard(texts){
   }
 }
 
-function cardGenerator(homeEl,cardEditor,cardsDisplay){
+function CardGenerator(homeEl,cardEditor,cardsDisplay){
   var currentCard = null;
   var cards = [];
   var loadedCards = null;
