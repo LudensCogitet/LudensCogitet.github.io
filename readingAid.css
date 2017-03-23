@@ -1,10 +1,18 @@
+#outerContainer{
+	width: 100%;
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	margin-left: -50%;
+}
+
 #container{
   font-size: 2em;
 }
 
-#setsDisplayContainer{
+#cardsDisplayContainer{
   position: absolute;
-  bottom: 0px;
+  bottom: 10px;
   left: -400px;
   width: 800px;
   margin-left: 50%;
@@ -14,13 +22,28 @@
   overflow-x: auto;
 }
 
-#saveSets{
+#saveCards{
 	position: absolute;
-	width: 120px;
+	width: 130px;
 	height: 30px;
 	right: 0;
 	top: 0;
 	
+}
+
+#saveCheckbox{
+	vertical-align: middle;
+	display: inline-block;
+	border: 2px solid black;
+	height: 15px;
+	width: 15px;
+	margin-left: 5px;
+	background-color:white;
+	cursor: pointer;
+}
+
+.checkboxChecked{
+	background-color: red !important;
 }
 
 .quizButton{
@@ -36,7 +59,7 @@
   background-color: black;
 }
 
-.setBoxDisplay{
+.cardBoxDisplay{
   text-align: center;
   padding: 4px;
   display: inline-block;
@@ -44,7 +67,7 @@
   margin: 2px;
 }
 
-.setBoxItem{
+.cardBoxItem{
   border-bottom: 1px solid black;
   margin-bottom: 5px;
 }
