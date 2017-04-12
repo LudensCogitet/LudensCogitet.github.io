@@ -18,16 +18,27 @@ $(document).ready(function(){
 	for(let i = 0; i < elements.length; i++){
 		waypoints.push(new Waypoint({
 																element: elements[i],
-																handler: function(){
-																	console.log(this.element);
-																	$(this.element).addClass("animated slideInLeft");
+																handler: function(direction){
+																	console.log(direction);
+																	if(direction == 'down'){
+																		$(this.element).removeClass('hidden');
+																		$(this.element).addClass("animated slideInLeft").one('animationend',function(){
+																			$(this).removeClass("animated slideInLeft");
+																		});
+																	}
+																	else{
+																		$(this.element).addClass("animated slideOutLeft").one('animationend',function(){
+																			$(this).addClass('hidden');
+																			$(this).removeClass("animated slideOutLeft");
+																		});
+																	}
 																},
-																offset: '50%'}));
+																offset: '70%'}));
 	}
 	
 	$('.pic').click(zoomIn);
 	
-	$('a[href^="#"]').on('click',function (e) {
+	$('a[href^="#"]').click(function (e) {
 	    e.preventDefault();
 
 	    var target = this.hash;

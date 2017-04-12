@@ -124,7 +124,6 @@ h3{
 }
 
 .subheading{
-
 }
 .light{
   background-color: #80dfff;
@@ -152,6 +151,7 @@ h3{
 		}
 	.screen{
 		width: 1000px;
+		/*height: 100vh;*/
 	}
 }
 
