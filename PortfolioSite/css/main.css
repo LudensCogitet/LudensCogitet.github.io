@@ -99,20 +99,8 @@ body{
 	font-size: 14pt;
 }
 .screen{
-  height: 100vh;
+  /*height: 100vh;*/
 	margin: 0 auto;
-}
-
-.screen:nth-child(odd){
-  background-color: #99e6ff;
-}
-
-.screen:nth-child(even){
-  background-color: #80dfff;
-}
-
-.content{
-	
 }
 
 .heading{
@@ -126,21 +114,36 @@ body{
 }
 
 h1{
-	background-color: #80dfff;
 	width: 70%;
 	margin: 10px 10px 10px 10px;
 }
 
 h3{
 	width: 90%;
-	background-color: #80dfff;
 	margin: 10px 10px 10px 10px;
 }
 
-#headshotPic{
-	width: 20%;
+.subheading{
+
+}
+.light{
+  background-color: #80dfff;
+}
+
+.dark{
+  background-color: #99e6ff;
+}
+
+.pic{
+	width: 28%;
 	float: right;
 	margin: 10px 10px 10px 10px;
+	transition: all .2s ease-in-out;
+}
+
+.picZoom{
+	width: 100%;
+	margin: 0;
 }
 	
 @media (min-width: 1000px){
