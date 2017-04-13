@@ -95,8 +95,6 @@ textarea {
    Author's custom styles
    ========================================================================== */
 body{
-	overflow-y: hidden;
-	overflow-x: auto;
 	background-color: #00ace6;
 	font-size: 14pt;
 }
@@ -104,6 +102,7 @@ body{
   /*height: 100vh;*/
 	position: absolute;
 	top: 5000px;
+	display: none;
 }
 
 .content{

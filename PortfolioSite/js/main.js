@@ -33,13 +33,20 @@ $(document).ready(function(){
 	$('.button').click(function(e){
 		e.preventDefault();
 		var target = $($(this).data('target'));
+		$('body').css('overflow', 'hidden');
+		target.css('display','block');
+		
 		var newTopVal = "5000px";
 		if($(this).hasClass('nextButton'))
 			newTopVal = "-5000px";
 		
 		currentScreen.animate({top:newTopVal},500,"swing",function(){
-			target.animate({top: "25vh"},500,"swing");
-			currentScreen=target;
+			currentScreen.css('display','none');
+			target.animate({top: "25vh"},500,"swing",function(){
+				currentScreen=target;
+				$('body').css('overflow','auto');
+			});
+			
 		});
 	});
 	
