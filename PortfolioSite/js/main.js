@@ -35,9 +35,6 @@ function setViewScreenTop(element){
 }
 
 $(document).ready(function(){
-	var viewScreenTop = '5vh';
-	
-	
 	$('.firstScreen').css('display','block');
 	$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
 	
