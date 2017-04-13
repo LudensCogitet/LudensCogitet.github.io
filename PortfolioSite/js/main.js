@@ -1,14 +1,27 @@
 
-function zoomOut(){
+function zoomOut(e){
+	e.preventDefault();
 	$(this).off('click');
-	$(this).removeClass("picZoom");
-	$(this).click(zoomIn);
+	$(this).fadeTo(500,0,function(){
+		$(this).remove();
+	});
 }
 
-function zoomIn(){
-	$(this).off('click');
-	$(this).addClass("picZoom");
-	$(this).click(zoomOut);
+function zoomIn(e){
+	e.preventDefault();
+	var zoomed = $("<img src='"+$(this).attr('src')+"'>");
+	zoomed.css({opacity: 0,
+							position: 'absolute',
+							'height': '100vh',
+							'z-index': 10});
+	zoomed.appendTo($('body'));
+	var xOffset = -zoomed.width()/2;
+	zoomed.css({'left': '50%',
+							'margin-left': xOffset});
+	zoomed.fadeTo(500,1,function(){
+		console.log("HI");
+		zoomed.click(zoomOut);
+	});
 }
 
 $(document).ready(function(){
