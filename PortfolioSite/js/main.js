@@ -14,30 +14,23 @@ function zoomIn(){
 $(document).ready(function(){
 	var waypoints = [];
 	var elements = document.getElementsByClassName('subheading');
+	var lastScroll = 0;
+	var currentScreen = $("#1");
 	
-	for(let i = 0; i < elements.length; i++){
-		waypoints.push(new Waypoint({
-																element: elements[i],
-																handler: function(direction){
-																	console.log(direction);
-																	if(direction == 'down'){
-																		$(this.element).removeClass('hidden');
-																		$(this.element).addClass("animated slideInLeft").one('animationend',function(){
-																			$(this).removeClass("animated slideInLeft");
-																		});
-																	}
-																	else{
-																		$(this.element).addClass("animated slideOutLeft").one('animationend',function(){
-																			$(this).addClass('hidden');
-																			$(this).removeClass("animated slideOutLeft");
-																		});
-																	}
-																},
-																offset: '70%'}));
-	}
+	$('.button').click(function(e){
+		e.preventDefault();
+		var target = $($(this).data('target'));
+		var newTopVal = "5000px";
+		if($(this).hasClass('nextButton'))
+			newTopVal = "-5000px";
+		
+		currentScreen.animate({top:newTopVal},500,"swing",function(){
+			target.animate({top: "25vh"},500,"swing");
+			currentScreen=target;
+		});
+	});
 	
 	$('.pic').click(zoomIn);
-	
 	$('a[href^="#"]').click(function (e) {
 	    e.preventDefault();
 

@@ -95,12 +95,18 @@ textarea {
    Author's custom styles
    ========================================================================== */
 body{
+	overflow: hidden;
 	background-color: #00ace6;
 	font-size: 14pt;
 }
 .screen{
   /*height: 100vh;*/
-	margin: 0 auto;
+	position: absolute;
+	top: 5000px;
+}
+
+.content{
+		margin: 0;
 }
 
 .heading{
@@ -113,6 +119,32 @@ body{
 	margin: 10px 10px 10px 10px;
 }
 
+.button{
+	position: absolute;
+	left: 50%;
+	margin-left: -100px;
+	text-align: center;
+	width: 200px;
+	font-size: 18pt;
+	cursor: pointer;
+	background-color: lightgreen;
+}
+
+.button:hover{
+	background-color: green;
+	color:white;
+}
+
+.nextButton{
+	border-radius: 0px 0px 10px 10px;
+	bottom: -14px;
+}
+
+.prevButton{
+	border-radius: 10px 10px 0px 0px;
+	top: -33px;
+}
+
 h1{
 	width: 70%;
 	margin: 10px 10px 10px 10px;
@@ -123,8 +155,6 @@ h3{
 	margin: 10px 10px 10px 10px;
 }
 
-.subheading{
-}
 .light{
   background-color: #80dfff;
 }
@@ -147,10 +177,12 @@ h3{
 	
 @media (min-width: 1000px){
 	.content{
-		width: 1000px;
+			width: 1000px;
 		}
 	.screen{
 		width: 1000px;
+		left: 50%;
+		margin-left: -500px;
 		/*height: 100vh;*/
 	}
 }
