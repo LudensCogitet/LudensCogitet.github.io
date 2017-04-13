@@ -96,17 +96,20 @@ textarea {
    ========================================================================== */
 body{
 	background-color: #00ace6;
-	font-size: 14pt;
 }
 .screen{
+	font-size: 0;
   /*height: 100vh;*/
 	position: absolute;
 	top: 5000px;
 	display: none;
+	margin: 0;
 }
 
 .content{
-		margin: 0;
+		font-size: 14pt;
+		width: 80vh
+		margin: 0 auto;
 }
 
 .heading{
@@ -116,13 +119,11 @@ body{
 
 .text{
 	width: 60%;
-	margin: 10px 10px 10px 10px;
+	padding: 10px 10px 10px 10px;
 }
 
 .button{
-	position: absolute;
-	left: 50%;
-	margin-left: -100px;
+	margin: 0 auto;
 	text-align: center;
 	width: 200px;
 	font-size: 18pt;
@@ -137,12 +138,12 @@ body{
 
 .nextButton{
 	border-radius: 0px 0px 10px 10px;
-	bottom: -14px;
+	/*bottom: -14px;*/
 }
 
 .prevButton{
 	border-radius: 10px 10px 0px 0px;
-	top: -33px;
+	/*top: -33px;*/
 }
 
 h1{
@@ -177,7 +178,7 @@ h3{
 	
 @media (min-width: 1000px){
 	.content{
-			width: 1000px;
+			/*width: 1000px;*/
 		}
 	.screen{
 		width: 1000px;

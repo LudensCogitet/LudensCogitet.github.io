@@ -24,7 +24,23 @@ function zoomIn(e){
 	});
 }
 
+function setViewScreenTop(element){
+	if(element.height() > $(window).height()){
+		return	{top:'5vh'};
+	}
+	else{
+		return {top:'50vh',
+						'margin-top': -element.height()/2};
+	}
+}
+
 $(document).ready(function(){
+	var viewScreenTop = '5vh';
+	
+	
+	$('.firstScreen').css('display','block');
+	$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
+	
 	var waypoints = [];
 	var elements = document.getElementsByClassName('subheading');
 	var lastScroll = 0;
@@ -42,7 +58,7 @@ $(document).ready(function(){
 		
 		currentScreen.animate({top:newTopVal},500,"swing",function(){
 			currentScreen.css('display','none');
-			target.animate({top: "25vh"},500,"swing",function(){
+			target.animate(setViewScreenTop(target),500,"swing",function(){
 				currentScreen=target;
 				$('body').css('overflow','auto');
 			});
