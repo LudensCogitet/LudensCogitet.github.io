@@ -4,6 +4,7 @@ function zoomOut(e){
 	$(this).off('click');
 	$(this).fadeTo(500,0,function(){
 		$(this).remove();
+		$('body').css('overflow-y','');
 	});
 }
 
@@ -15,10 +16,14 @@ function zoomIn(e){
 								position: 'absolute',
 								'height': '100vh',
 								'z-index': 10});
+		$('body').css('overflow-y','hidden');
 		zoomed.appendTo($('body'));
-		var xOffset = -zoomed.width()/2;
-		zoomed.css({'left': '50%',
-								'margin-left': xOffset});
+	
+		if(zoomed.width() < $(window).width()){
+			zoomed.css({'left': '50%',
+									'margin-left': -zoomed.width()/2});
+		}
+
 		zoomed.fadeTo(500,1,function(){
 			console.log("HI");
 			zoomed.click(zoomOut);
@@ -69,16 +74,4 @@ $(document).ready(function(){
 	});
 	
 	$('.pic').click(zoomIn);
-	$('a[href^="#"]').click(function (e) {
-	    e.preventDefault();
-
-	    var target = this.hash;
-	    var $target = $(target);
-
-	    $('html, body').stop().animate({
-	        'scrollTop': $target.offset().top
-	    }, 2000, 'swing', function () {
-	        window.location.hash = target;
-	    });
-	});
 });
