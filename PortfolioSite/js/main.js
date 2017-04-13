@@ -10,17 +10,19 @@ function zoomOut(e){
 function zoomIn(e){
 	e.preventDefault();
 	var zoomed = $("<img src='"+$(this).attr('src')+"'>");
-	zoomed.css({opacity: 0,
-							position: 'absolute',
-							'height': '100vh',
-							'z-index': 10});
-	zoomed.appendTo($('body'));
-	var xOffset = -zoomed.width()/2;
-	zoomed.css({'left': '50%',
-							'margin-left': xOffset});
-	zoomed.fadeTo(500,1,function(){
-		console.log("HI");
-		zoomed.click(zoomOut);
+	zoomed.load(function(){
+		zoomed.css({opacity: 0,
+								position: 'absolute',
+								'height': '100vh',
+								'z-index': 10});
+		zoomed.appendTo($('body'));
+		var xOffset = -zoomed.width()/2;
+		zoomed.css({'left': '50%',
+								'margin-left': xOffset});
+		zoomed.fadeTo(500,1,function(){
+			console.log("HI");
+			zoomed.click(zoomOut);
+		});
 	});
 }
 
@@ -55,8 +57,11 @@ $(document).ready(function(){
 		
 		currentScreen.animate({top:newTopVal},500,"swing",function(){
 			currentScreen.css('display','none');
+			$(document).scrollTop(0);
 			target.animate(setViewScreenTop(target),500,"swing",function(){
 				currentScreen=target;
+				console.log("scrollTop",$(document).scrollTop());
+				console.log("scrollTop",$(document).scrollTop());
 				$('body').css('overflow','auto');
 			});
 			
