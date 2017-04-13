@@ -26,7 +26,7 @@ function zoomIn(e){
 
 function setViewScreenTop(element){
 	if(element.height() > $(window).height()){
-		return	{top:'5vh'};
+		return	{top:'0vh'};
 	}
 	else{
 		return {top:'50vh',
