@@ -33,22 +33,32 @@ function zoomIn(e){
 
 function setViewScreenTop(element){
 	if(element.height() > $(window).height()){
-		return	{top:'0vh'};
+		return	{top: 0,'margin-top':''};
 	}
 	else{
-		return {top:'50vh',
+		return {top: $(window).height()/2,
 						'margin-top': -element.height()/2};
 	}
 }
 
 $(document).ready(function(){
-	var background = new BackgroundAnimation(1000,50,['#00ace6','#99e6ff']);
+	var background = new BackgroundAnimation(['#00ace6','#99e6ff'],500,50);
+	background.setup('fromBottom');
 	
-	$('.firstScreen').css('display','block');
-	$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
+ setTimeout(function(){
+	 	background.play(function(){
+		$('.firstScreen').css('display','block');
+		$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
+		background.play(function(){
+			$('.firstScreen').css('z-index',0);
+			background.play(function(){$('#navbar').fadeIn(800);},'in');
+		},'outUp');
+		//$('.firstScreen').animate(setViewScreenTop($('.firstScreen')),500);
+	},'in');
 	
-	var elements = document.getElementsByClassName('subheading');
-	var lastScroll = 0;
+	/*$('.firstScreen').css(setViewScreenTop($('.firstScreen')));*/
+ },200);
+	
 	var currentScreen = $("#1");
 	
 	$('.button').click(function(e){
@@ -66,8 +76,6 @@ $(document).ready(function(){
 			$(document).scrollTop(0);
 			target.animate(setViewScreenTop(target),500,"swing",function(){
 				currentScreen=target;
-				console.log("scrollTop",$(document).scrollTop());
-				console.log("scrollTop",$(document).scrollTop());
 				$('body').css('overflow','auto');
 			});
 			
@@ -75,4 +83,5 @@ $(document).ready(function(){
 	});
 	
 	$('.pic').click(zoomIn);
+	$(window).resize(function(){currentScreen.css(setViewScreenTop(currentScreen));});
 });

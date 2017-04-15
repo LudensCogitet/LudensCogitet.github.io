@@ -1,13 +1,9 @@
-function BackgroundAnimation(setSpeed = 500, setDelay = 0, colors = ['green','blue'], lineWidth = 75, autoPlay = true){
+function BackgroundAnimation(colors = ['green','blue'], setSpeed = 1000, setDelay = 100, lineWidth = 75){
 	var $window = $(window);
 	var lines = [];
 	
 	var resizeTimeout;
 	var lineTimeouts = [];
-	
-	setup();
-	if(autoPlay)
-		play(setSpeed,setDelay);
 	
 	$window.resize(function(){
 		$('.line').stop();
@@ -20,13 +16,13 @@ function BackgroundAnimation(setSpeed = 500, setDelay = 0, colors = ['green','bl
 		clearTimeout(resizeTimeout);
 	
 		resizeTimeout = setTimeout(function(){
-			setup();
-			play(setSpeed,setDelay);
+			setup('noAnim');
 		},100);
 	});
 
-	function setup(){
+	function setup(style = 'alternate'){
 		lineTimeouts = [];
+		
 		if(lines.length > 0){
 			for(let i = 0; i < lines.length; i++)
 				lines[i].remove();
@@ -35,10 +31,15 @@ function BackgroundAnimation(setSpeed = 500, setDelay = 0, colors = ['green','bl
 		
 		for(let left = 0, d = 0; left < $window.width(); left += lineWidth, d++){
 			var top;
-			if(d % 2 == 0)
-				top = $window.height()+1;
-			else
+			if(style == 'noAnim'){
+				top = 0;
+			}
+			else if(style == 'fromTop'){
 				top = -$window.height()-1;
+			}
+			else if(style == 'fromBottom'){
+				top = $window.height()+1;
+			}
 			
 			var newDiv = $("<div class='backgroundLine'>");
 			newDiv.hide();
@@ -55,9 +56,23 @@ function BackgroundAnimation(setSpeed = 500, setDelay = 0, colors = ['green','bl
 	}
 	this.setup = setup;
 	
-  function play(speed = setSpeed, delay = setDelay){
+  function play(callback = null, dir = 'in', speed = setSpeed, delay = setDelay){
+		let newTop = 0;
 		for(let i = 0; i < lines.length; i++){
-			lineTimeouts.push(setTimeout(function(){lines[i].animate({top: 0},speed);},i*delay));
+			console.log("i: ",i);
+			if(dir == 'outDown'){
+				newTop = $window.height()+1;
+			}
+			else if (dir == 'outUp'){
+				newTop = -$window.height()-1;
+			}	
+			
+			if(i == lines.length -1 && callback != null){
+				lineTimeouts.push(setTimeout(function(){lines[i].animate({top: newTop},speed,'swing',callback);},i*delay));
+			}
+			else{
+				lineTimeouts.push(setTimeout(function(){lines[i].animate({top: newTop},speed);},i*delay));
+			}
 		}
 	}
 	this.play = play;
