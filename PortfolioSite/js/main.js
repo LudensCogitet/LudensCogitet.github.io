@@ -42,10 +42,11 @@ function setViewScreenTop(element){
 }
 
 $(document).ready(function(){
+	var background = new BackgroundAnimation(1000,50,['#00ace6','#99e6ff']);
+	
 	$('.firstScreen').css('display','block');
 	$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
 	
-	var waypoints = [];
 	var elements = document.getElementsByClassName('subheading');
 	var lastScroll = 0;
 	var currentScreen = $("#1");
