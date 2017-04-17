@@ -28,6 +28,10 @@
 	cursor: pointer;
 }
 
+#navMenu .bottom{
+		border-radius: 0px 0px 0px 10px;
+}
+
 #navMenu li.active, #navMenu li:hover{
 	color: white;
 	background-color: green;
@@ -54,8 +58,8 @@
 }
 
 #navIcon div{
-	padding-top: 0.8vw;
-	margin-left: 1vw;
-	margin-right: 1vw;
-	border-bottom: 0.5vw solid black;
+	padding-top: 19px;
+	margin-left: 20px;
+	margin-right: 20px;
+	border-bottom: 8px solid black;
 }

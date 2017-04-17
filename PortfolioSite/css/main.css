@@ -101,7 +101,6 @@ body{
 	font-size: 0;
   /*height: 100vh;*/
 	position: absolute;
-	top: 5000px;
 	display: none;
 	margin: 0;
 }

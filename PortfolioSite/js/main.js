@@ -35,15 +35,15 @@ function zoomIn(e){
 
 function setViewScreenTop(element){
 	if(element.height() > $(window).height()){
-		return	{top: 0,'margin-top':''};
+		return	{top: 0};
 	}
 	else{
-		return {top: $(window).height()/2,
-						'margin-top': -element.height()/2};
+		return {top: $(window).height()/2 -element.height()/2};
 	}
 }
 
 $(document).ready(function(){
+	var currentScreen = $("#1");
 	var background = new BackgroundAnimation(['#00ace6','#99e6ff'],500,50);
 	background.setup('fromBottom');
 	
@@ -61,34 +61,37 @@ $(document).ready(function(){
 	/*$('.firstScreen').css(setViewScreenTop($('.firstScreen')));*/
  },200);
 	
-	var currentScreen = $("#1");
-	
 	function moveToScreen(targets){
-		console.log("target", target, "currentScreen",currentScreen.attr('id'));
-		var newTopVal = "5000px";
-		if(targets[0] > currentScreen.attr('id'))
-			newTopVal = "-5000px";
+		var target = $('#'+targets[0]);
+		var newTopVal = $(window).height()+1;
+		if(targets[0] > currentScreen.attr('id')){
+			console.log("BOOP");
+			target.css('top', newTopVal);
+			newTopVal = -newTopVal -currentScreen.height();
+		}
 		
 		$('#navMenu .active').removeClass('active');
 		$('#navMenu li[data-target='+targets[0]+']').addClass('active');
 		
-		var target = $('#'+targets[0]);
+		$(window).scrollTop(0);
+		$(document).scrollTop(0);
+		console.log('newTopVal',newTopVal);
+		console.log('target',targets[0]);
 		$('body').css('overflow', 'hidden');
 		target.css('display','block');
-		
-		currentScreen.animate({top:newTopVal},500,"swing",function(){
-			currentScreen.css('display','none');
-			$(document).scrollTop(0);
-			target.animate(setViewScreenTop(target),500,"swing",function(){
-				currentScreen=target;
-				$('body').css('overflow','auto');
-				if(targets.length > 1){
-					targets.shift();
-					moveToScreen(targets);
-				}
+		console.log($(window).scrollTop());
+			currentScreen.animate({top:newTopVal},500,"swing",function(){
+				console.log('top',currentScreen.css('top'));
+				currentScreen.css('display','none');
+				target.animate(setViewScreenTop(target),500,"swing",function(){
+					currentScreen = target;
+					$('body').css('overflow','auto');
+					if(targets.length > 1){
+						targets.shift();
+						moveToScreen(targets);
+					}
+				});
 			});
-			
-		});
 	}
 	
 	$('.button').click(function(e){
@@ -121,9 +124,9 @@ $(document).ready(function(){
 	
 	$(window).resize(function(){
 		currentScreen.css(setViewScreenTop(currentScreen));
-		$('.firstScreen').css('display','block');
-		$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
-		$('.firstScreen').css('z-index',0);
+		currentScreen.css('display','block');
+		currentScreen.css(setViewScreenTop($('.firstScreen')));
+		currentScreen.css('z-index',0);
 		$('#navSpace').show();
 	});
 });
