@@ -1,10 +1,14 @@
 #navSpace{
 	display: none;
-	position:relative;
-	float: right;
-	background-color: lightgreen;
+	position: fixed;
+	
+	width: 200px;
+	
+	left: 100%;
+	margin-left: -200px;
+
 	border-radius: 0px 0px 0px 10px;
-	box-shadow: 10px 10px 10px black;
+	
 	padding: 0;
 	z-index: 1000;
 }
@@ -13,11 +17,13 @@
     margin: 0;
     padding: 0;
 		display: none;
+		border-radius: 0px 0px 0px 10px;
+		box-shadow: 10px 10px 10px black;
+		background-color: lightgreen;
 }
 
 #navMenu li{
-  width: 200px;
-	font-size: 3vh;
+	font-size: 16pt;
   text-align: center;
 	cursor: pointer;
 }
@@ -28,12 +34,15 @@
 }
 
 #navIcon{
+	float: right;
 	text-align: center;
-	width: 5vw;
-	height: 5vw;
+	width: 100px;
+	height: 100px;
 	margin: 0;
 	padding: 0;
 	border-radius: 0px 0px 0px 10px;
+	box-shadow: 10px 10px 10px black;
+	background-color: lightgreen;
 }
 
 #navIcon:hover{
