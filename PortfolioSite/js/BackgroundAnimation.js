@@ -59,7 +59,6 @@ function BackgroundAnimation(colors = ['green','blue'], setSpeed = 1000, setDela
   function play(callback = null, dir = 'in', speed = setSpeed, delay = setDelay){
 		let newTop = 0;
 		for(let i = 0; i < lines.length; i++){
-			console.log("i: ",i);
 			if(dir == 'outDown'){
 				newTop = $window.height()+1;
 			}

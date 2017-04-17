@@ -1,38 +1,52 @@
-#navbar{
-		display: inline-block;
-		float: right;
+#navSpace{
+	display: none;
+	position:relative;
+	float: right;
+	background-color: lightgreen;
+	border-radius: 0px 0px 0px 10px;
+	box-shadow: 10px 10px 10px black;
+	padding: 0;
+	z-index: 1000;
+}
+#navMenu{
     list-style-type: none;
     margin: 0;
     padding: 0;
-		background-color: lightgreen;
-		border-radius: 0px 0px 0px 10px;
 		display: none;
-		box-shadow: 10px 10px 10px black;
 }
 
-#navbar li{
+#navMenu li{
   width: 200px;
 	font-size: 3vh;
   text-align: center;
+	cursor: pointer;
 }
 
-#navbar li.active, #navbar li:hover{
+#navMenu li.active, #navMenu li:hover{
 	color: white;
 	background-color: green;
 }
 
-#navbar li.bottom{
+#navIcon{
+	text-align: center;
+	width: 5vw;
+	height: 5vw;
+	margin: 0;
+	padding: 0;
 	border-radius: 0px 0px 0px 10px;
 }
 
-#navbar a{
-  text-decoration: none;
-  color: inherit;
-  cursor: auto;
+#navIcon:hover{
+	background-color: green;
 }
 
-#navbar a:visited{
-  text-decoration: none;
-  color: inherit;
-  cursor: auto;
+#navIcon:hover div{
+	border-bottom-color: white;
+}
+
+#navIcon div{
+	padding-top: 0.8vw;
+	margin-left: 1vw;
+	margin-right: 1vw;
+	border-bottom: 0.5vw solid black;
 }

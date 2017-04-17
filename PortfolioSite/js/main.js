@@ -2,6 +2,7 @@
 function zoomOut(e){
 	e.preventDefault();
 	$(this).off('click');
+	$('#navSpace').fadeIn(500);
 	$(this).fadeTo(500,0,function(){
 		$(this).remove();
 		$('body').css('overflow-y','');
@@ -24,6 +25,7 @@ function zoomIn(e){
 									'margin-left': -zoomed.width()/2});
 		}
 
+		$('#navSpace').fadeOut(500);
 		zoomed.fadeTo(500,1,function(){
 			console.log("HI");
 			zoomed.click(zoomOut);
@@ -51,7 +53,7 @@ $(document).ready(function(){
 		$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
 		background.play(function(){
 			$('.firstScreen').css('z-index',0);
-			background.play(function(){$('#navbar').fadeIn(800);},'in');
+			background.play(function(){$('#navSpace').fadeIn(800);},'in');
 		},'outUp');
 		//$('.firstScreen').animate(setViewScreenTop($('.firstScreen')),500);
 	},'in');
@@ -61,15 +63,18 @@ $(document).ready(function(){
 	
 	var currentScreen = $("#1");
 	
-	$('.button').click(function(e){
-		e.preventDefault();
-		var target = $($(this).data('target'));
+	function moveToScreen(targets){
+		console.log("target", target, "currentScreen",currentScreen.attr('id'));
+		var newTopVal = "5000px";
+		if(targets[0] > currentScreen.attr('id'))
+			newTopVal = "-5000px";
+		
+		$('#navMenu .active').removeClass('active');
+		$('#navMenu li[data-target='+targets[0]+']').addClass('active');
+		
+		var target = $('#'+targets[0]);
 		$('body').css('overflow', 'hidden');
 		target.css('display','block');
-		
-		var newTopVal = "5000px";
-		if($(this).hasClass('nextButton'))
-			newTopVal = "-5000px";
 		
 		currentScreen.animate({top:newTopVal},500,"swing",function(){
 			currentScreen.css('display','none');
@@ -77,11 +82,48 @@ $(document).ready(function(){
 			target.animate(setViewScreenTop(target),500,"swing",function(){
 				currentScreen=target;
 				$('body').css('overflow','auto');
+				if(targets.length > 1){
+					targets.shift();
+					moveToScreen(targets);
+				}
 			});
 			
 		});
+	}
+	
+	$('.button').click(function(e){
+		e.preventDefault();
+		moveToScreen([$(this).data('target')]);
+		
+	});
+	
+	$('#navMenu li').click(function(e){
+		var $this = $(this);
+		e.preventDefault();
+		$this.addClass('active');
+		moveToScreen([$this.data('target')]);
 	});
 	
 	$('.pic').click(zoomIn);
-	$(window).resize(function(){currentScreen.css(setViewScreenTop(currentScreen));});
+	
+	$('#navSpace').click(function(){
+		var $this = $(this);
+		if($this.hasClass('navClosed')){
+			$this.removeClass('navClosed');
+			$('#navIcon *').fadeOut(500,function(){
+					$('#navIcon').slideUp(500,function(){
+					$('#navIcon').hide();
+					$('#navMenu').slideDown(500);
+				});
+			});
+		}
+	});
+	
+	$(window).resize(function(){
+		currentScreen.css(setViewScreenTop(currentScreen));
+		$('.firstScreen').css('display','block');
+		$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
+		$('.firstScreen').css('z-index',0);
+		$('#navSpace').show();
+	});
 });
