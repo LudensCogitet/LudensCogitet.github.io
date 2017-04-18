@@ -1,4 +1,4 @@
-function BackgroundAnimation(bgColor = 'green', colors = ['green','blue'], setSpeed = 1000, setDelay = 100, lineWidth = 75){
+function BackgroundAnimation(bgColor = 'green', setSpeed = 1000, setDelay = 100, lineWidth = 75){
 	var $window = $(window);
 	var lines = [];
 	
@@ -38,14 +38,15 @@ function BackgroundAnimation(bgColor = 'green', colors = ['green','blue'], setSp
 				top = $window.height()+1;
 			}
 			
-			var newDiv = $("<div class='backgroundLine'>");
+			var tones = ['dark','darker'];
+			
+			var newDiv = $("<div class='backgroundLine "+tones[d%2]+"'>");
 			newDiv.hide();
 			newDiv.appendTo($('body'));
 			newDiv.css({top: top,
 									left: left,
 									width: lineWidth,
-									height: $window.height(),
-									'background-color': colors[d%2]});
+									height: $window.height()});
 			
 			lines.push(newDiv);
 			newDiv.show();

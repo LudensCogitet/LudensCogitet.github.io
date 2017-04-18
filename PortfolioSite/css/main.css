@@ -162,11 +162,15 @@ body{
 	margin: 10px 10px 10px 10px;
 }
 
-.light{
-  background-color: #80dfff;
+.darker{
+	background-color: #00ace6;
 }
 
 .dark{
+  background-color: #80dfff;
+}
+
+.light{
   background-color: #99e6ff;
 }
 

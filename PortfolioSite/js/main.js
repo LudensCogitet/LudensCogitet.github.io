@@ -79,25 +79,10 @@ function loadScreens(){
 							
 							
 							newScreen = $("<div id="+i+" class='"+classes+"'>");
-					
-							classes = "content";
+
+							newContent = $("<div class='content dark'>");
 							
-							if(i % 2 == 0)
-								classes += " light";
-							else
-								classes += " dark";
-							
-							console.log("classes",classes);
-							
-							newContent = $("<div class='"+classes+"'>");
-							
-							if(i % 2 == 0)
-								classes = "dark";
-							else
-								classes = "light";
-							
-							
-							newHeading = $("<div class='heading'><h1>"+result[i].heading+"</h1><h3 class='"+classes+"'>"+result[i].subheading+"</h3></div>");
+							newHeading = $("<div class='heading'><h1>"+result[i].heading+"</h1><h3 class='light'>"+result[i].subheading+"</h3></div>");
 							
 							newText = $("<div class='text'>"+result[i].text+"</div>");
 							
@@ -125,7 +110,7 @@ function loadScreens(){
 				 });
 }
 
-var background = new BackgroundAnimation('#00ace6',['#00ace6','#99e6ff'],500,50);
+var background = new BackgroundAnimation('#00ace6',500,50);
 var currentScreen = null;
 
 function moveToScreen(targets){
