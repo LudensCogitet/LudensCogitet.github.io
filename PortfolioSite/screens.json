@@ -14,6 +14,11 @@
 							"image":				"img/database.jpg",
 							"text":					"txt/projects.txt"
 							},
+							{"heading": 		"John Hiner Again",
+							 "subheading": 	"Here's another picture of me.",
+							 "image":				"img/ProfilePic.jpg",
+							 "text":				"txt/jrhAgain.txt"
+							},
 							{"heading": 		"HAR HAR HAR",
 							"subheading": 	"lolololol",
 							"image":				"img/Jack.jpg",

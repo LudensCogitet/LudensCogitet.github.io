@@ -48,64 +48,25 @@ function loadScreens(){
 					url: "getScreens.php",
 					error: function(){$('body').append($('<h1>Sorry about this, but something\'s gone wrong.</h1>'));},
 					success: function(result){
-							result = JSON.parse(result).screens;
-
-							var newScreen;
-							var newContent;
-							var newHeading;
-							var newText;
-							var newPrevButton;
-							var newNextButton;
+						console.log(result);
+						result = JSON.parse(result);
 						
 						for(let i = 0; i < result.length; i++){
 							if(result.length > 2 && i == 2 || i == result.length-1){
 								currentScreen = $('.firstScreen');
 							}
 							
-							var classes = "screen";
-							if(i == 0){
-								classes += " firstScreen";
-								newPrevButton = null;
-								newNextButton = $("<div class='button nextButton' data-target="+(i+1)+">&#8681;</div>");
-							}
-							else if(i == result.length-1){
-								newPrevButton = $("<div class='button prevButton' data-target="+(i-1)+">&#8679;</div>");
-								newNextButton = null;
-							}
-							else{
-								newPrevButton = $("<div class='button prevButton' data-target="+(i-1)+">&#8679;</div>");
-								newNextButton = $("<div class='button nextButton' data-target="+(i+1)+">&#8681;</div>");
-							}
+							var newScreen = $(result[i]);
 							
+							newScreen.find('.button').click(function(e){
+								e.preventDefault();
+								moveToScreen([$(this).data('target')]);
+							});
 							
-							newScreen = $("<div id="+i+" class='"+classes+"'>");
-
-							newContent = $("<div class='content dark'>");
-							
-							newHeading = $("<div class='heading'><h1>"+result[i].heading+"</h1><h3 class='light'>"+result[i].subheading+"</h3></div>");
-							
-							newText = $("<div class='text'>"+result[i].text+"</div>");
-							
-							newText.prepend("<span><img class='pic' src='"+result[i].image+"'></span>");
-							newText.append("<div style='clear:both;'>");
-							
-							newContent.append(newHeading);
-							newContent.append(newText);
-							
-							newScreen.append(newPrevButton);
-							newScreen.append(newContent);
-							newScreen.append(newNextButton);
-							console.dir(newScreen);
+							newScreen.find('.pic').click(zoomIn);
 							
 							$('body').append(newScreen);
 						}
-						
-						$('.button').click(function(e){
-							e.preventDefault();
-							moveToScreen([$(this).data('target')]);
-						});
-						
-						$('.pic').click(zoomIn);
 					}
 				 });
 }
