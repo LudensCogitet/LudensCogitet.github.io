@@ -1,11 +1,11 @@
-function BackgroundAnimation(colors = ['green','blue'], setSpeed = 1000, setDelay = 100, lineWidth = 75){
+function BackgroundAnimation(bgColor = 'green', colors = ['green','blue'], setSpeed = 1000, setDelay = 100, lineWidth = 75){
 	var $window = $(window);
 	var lines = [];
 	
 	var resizeTimeout;
 	var lineTimeouts = [];
 	
-	$window.resize(function(){
+	this.bail = function(){
 		$('.line').stop();
 		
 		for(let i = 0; i < lineTimeouts.length; i++)
@@ -13,12 +13,9 @@ function BackgroundAnimation(colors = ['green','blue'], setSpeed = 1000, setDela
 		
 		lineTimeouts = [];
 		
-		clearTimeout(resizeTimeout);
-	
-		resizeTimeout = setTimeout(function(){
-			setup('noAnim');
-		},100);
-	});
+		$('html').css('background-color',bgColor);
+		remove();
+	}
 
 	function setup(style = 'alternate'){
 		lineTimeouts = [];
@@ -75,4 +72,15 @@ function BackgroundAnimation(colors = ['green','blue'], setSpeed = 1000, setDela
 		}
 	}
 	this.play = play;
+	
+	this.fadeOut = function(callback, time = 500){
+		$('html').css('background-color',bgColor);
+		$('.backgroundLine').fadeOut(time,'swing',callback);
+	}
+	
+	function remove(){
+		$('.backgroundLine').remove();
+	}
+	
+	this.remove = remove;
 }

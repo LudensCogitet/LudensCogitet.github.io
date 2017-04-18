@@ -1,0 +1,22 @@
+{
+	"screens":[{"heading": 			"John Hiner",
+							"subheading": 	"Full Stack Web Developer",
+							"image":				"img/headShot.jpg",
+							"text":					"txt/about.txt"
+							},
+							{"heading": 		"Autumn Philpot",
+							"subheading": 	"Wife of a Full Stack Web Developer",
+							"image":				"img/Autumn.jpg",
+							"text":					"txt/wife.txt"
+							},
+							{"heading": 		"Projects",
+							"subheading": 	"Custom Database",
+							"image":				"img/database.jpg",
+							"text":					"txt/projects.txt"
+							},
+							{"heading": 		"HAR HAR HAR",
+							"subheading": 	"lolololol",
+							"image":				"img/Jack.jpg",
+							"text":					"txt/jack.txt"
+							}]
+}

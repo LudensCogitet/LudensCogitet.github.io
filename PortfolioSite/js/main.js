@@ -42,63 +42,153 @@ function setViewScreenTop(element){
 	}
 }
 
-$(document).ready(function(){
-	var currentScreen = $("#1");
-	var background = new BackgroundAnimation(['#00ace6','#99e6ff'],500,50);
-	background.setup('fromBottom');
-	
- setTimeout(function(){
-	 	background.play(function(){
-		$('.firstScreen').css('display','block');
-		$('.firstScreen').css(setViewScreenTop($('.firstScreen')));
-		background.play(function(){
-			$('.firstScreen').css('z-index',0);
-			background.play(function(){$('#navSpace').fadeIn(800);},'in');
-		},'outUp');
-		//$('.firstScreen').animate(setViewScreenTop($('.firstScreen')),500);
-	},'in');
-	
-	/*$('.firstScreen').css(setViewScreenTop($('.firstScreen')));*/
- },200);
-	
-	function moveToScreen(targets){
-		var target = $('#'+targets[0]);
-		var newTopVal = $(window).height()+1;
-		if(targets[0] > currentScreen.attr('id')){
-			console.log("BOOP");
-			target.css('top', newTopVal);
-			newTopVal = -newTopVal -currentScreen.height();
-		}
-		
-		$('#navMenu .active').removeClass('active');
-		$('#navMenu li[data-target='+targets[0]+']').addClass('active');
-		
-		$(window).scrollTop(0);
-		$(document).scrollTop(0);
-		console.log('newTopVal',newTopVal);
-		console.log('target',targets[0]);
-		$('body').css('overflow', 'hidden');
-		target.css('display','block');
-		console.log($(window).scrollTop());
-			currentScreen.animate({top:newTopVal},500,"swing",function(){
-				console.log('top',currentScreen.css('top'));
-				currentScreen.css('display','none');
-				target.animate(setViewScreenTop(target),500,"swing",function(){
-					currentScreen = target;
-					$('body').css('overflow','auto');
-					if(targets.length > 1){
-						targets.shift();
-						moveToScreen(targets);
+function loadScreens(){
+		$.ajax(
+				 {method: "POST",
+					url: "getScreens.php",
+					error: function(){$('body').append($('<h1>Sorry about this, but something\'s gone wrong.</h1>'));},
+					success: function(result){
+							result = JSON.parse(result).screens;
+
+							var newScreen;
+							var newContent;
+							var newHeading;
+							var newText;
+							var newPrevButton;
+							var newNextButton;
+						
+						for(let i = 0; i < result.length; i++){
+							if(result.length > 2 && i == 2 || i == result.length-1){
+								currentScreen = $('.firstScreen');
+							}
+							
+							var classes = "screen";
+							if(i == 0){
+								classes += " firstScreen";
+								newPrevButton = null;
+								newNextButton = $("<div class='button nextButton' data-target="+(i+1)+">&#8681;</div>");
+							}
+							else if(i == result.length-1){
+								newPrevButton = $("<div class='button prevButton' data-target="+(i-1)+">&#8679;</div>");
+								newNextButton = null;
+							}
+							else{
+								newPrevButton = $("<div class='button prevButton' data-target="+(i-1)+">&#8679;</div>");
+								newNextButton = $("<div class='button nextButton' data-target="+(i+1)+">&#8681;</div>");
+							}
+							
+							
+							newScreen = $("<div id="+i+" class='"+classes+"'>");
+					
+							classes = "content";
+							
+							if(i % 2 == 0)
+								classes += " light";
+							else
+								classes += " dark";
+							
+							console.log("classes",classes);
+							
+							newContent = $("<div class='"+classes+"'>");
+							
+							if(i % 2 == 0)
+								classes = "dark";
+							else
+								classes = "light";
+							
+							
+							newHeading = $("<div class='heading'><h1>"+result[i].heading+"</h1><h3 class='"+classes+"'>"+result[i].subheading+"</h3></div>");
+							
+							newText = $("<div class='text'>"+result[i].text+"</div>");
+							
+							newText.prepend("<span><img class='pic' src='"+result[i].image+"'></span>");
+							newText.append("<div style='clear:both;'>");
+							
+							newContent.append(newHeading);
+							newContent.append(newText);
+							
+							newScreen.append(newPrevButton);
+							newScreen.append(newContent);
+							newScreen.append(newNextButton);
+							console.dir(newScreen);
+							
+							$('body').append(newScreen);
+						}
+						
+						$('.button').click(function(e){
+							e.preventDefault();
+							moveToScreen([$(this).data('target')]);
+						});
+						
+						$('.pic').click(zoomIn);
 					}
-				});
-			});
+				 });
+}
+
+var background = new BackgroundAnimation('#00ace6',['#00ace6','#99e6ff'],500,50);
+var currentScreen = null;
+
+function moveToScreen(targets){
+	var target = $('#'+targets[0]);
+	console.dir(target);
+	
+	var newTopVal = $(window).height()+1;
+	if(targets[0] > currentScreen.attr('id')){
+		console.log("BOOP");
+		target.css('top', newTopVal);
+		newTopVal = -newTopVal -currentScreen.height();
 	}
 	
-	$('.button').click(function(e){
-		e.preventDefault();
-		moveToScreen([$(this).data('target')]);
-		
-	});
+	$('#navMenu .active').removeClass('active');
+	$('#navMenu li[data-target='+targets[0]+']').addClass('active');
+	
+	$(window).scrollTop(0);
+	$(document).scrollTop(0);
+	console.log('newTopVal',newTopVal);
+	console.log('target',targets[0]);
+	$('body').css('overflow', 'hidden');
+	target.css('display','block');
+	console.log($(window).scrollTop());
+		currentScreen.animate({top:newTopVal},500,"swing",function(){
+			console.log('top',currentScreen.css('top'));
+			currentScreen.css('display','none');
+			target.animate(setViewScreenTop(target),500,"swing",function(){
+				currentScreen = target;
+				$('body').css('overflow','auto');
+				if(targets.length > 1){
+					targets.shift();
+					moveToScreen(targets);
+				}
+			});
+		});
+}
+
+function introAnim(){
+	console.log(currentScreen);
+	background.play(function(){
+		if(currentScreen != null){
+			currentScreen.css('display','block');
+			currentScreen.css(setViewScreenTop($('.firstScreen')));
+			background.play(function(){
+				currentScreen.css('z-index',0);
+				background.play(function(){
+					$('#navSpace').fadeIn(800);
+					background.fadeOut(background.remove);
+				},'in');
+			},'outUp');
+		}
+		else{
+			background.play(function(){
+				background.play(introAnim,'in');
+			},'outUp');
+		}
+	},'in');
+}
+
+$(document).ready(function(){
+	background.setup('fromBottom');
+	setTimeout(function(){introAnim();},200);
+	loadScreens();
 	
 	$('#navMenu li').click(function(e){
 		var $this = $(this);
@@ -106,8 +196,6 @@ $(document).ready(function(){
 		$this.addClass('active');
 		moveToScreen([$this.data('target')]);
 	});
-	
-	$('.pic').click(zoomIn);
 	
 	$('#navSpace').click(function(){
 		var $this = $(this);
@@ -127,6 +215,7 @@ $(document).ready(function(){
 		currentScreen.css('display','block');
 		currentScreen.css(setViewScreenTop($('.firstScreen')));
 		currentScreen.css('z-index',0);
+		background.bail();
 		$('#navSpace').show();
 	});
 });

@@ -150,12 +150,14 @@ body{
 	/*top: -33px;*/
 }
 
-h1{
+.heading h1{
+	display: block;
 	width: 70%;
 	margin: 0px 10px 10px 10px;
 }
 
-h3{
+.heading h3{
+	display: block;
 	width: 90%;
 	margin: 10px 10px 10px 10px;
 }
