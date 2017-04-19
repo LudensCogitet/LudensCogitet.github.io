@@ -5,28 +5,26 @@
 							"image":				"img/headShot.jpg",
 							"text":					"txt/about.txt"
 							},
-							{"name":				"My Wife",
-							 "heading": 		"Autumn Philpot",
-							 "subheading": 	"Wife of a Full Stack Web Developer",
-							 "image":				"img/Autumn.jpg",
-							 "text":				"txt/wife.txt"
-							},
+							{"START":				"Projects"},
 							{"name":				"Database",
 							 "heading": 		"Projects",
 							 "subheading": 	"Custom Database",
 							 "image":				"img/database.jpg",
 							 "text":				"txt/projects.txt"
 							},
-							{"name":				"Me Again",
-							 "heading": 		"John Hiner Again",
-							 "subheading": 	"Here's another picture of me.",
-							 "image":				"img/ProfilePic.jpg",
-							 "text":				"txt/jrhAgain.txt"
-							},
+							{"START":				"My Boy"},
 							{"name":				"Jack!",
 							 "heading": 		"HAR HAR HAR",
 							 "subheading": 	"lolololol",
 							 "image":				"img/Jack.jpg",
 							 "text":				"txt/jack.txt"
+							},
+							{"END":					"My Boy"},
+							{"END":					"Projects"},
+							{"name":				"Me Again",
+							 "heading": 		"John Hiner Again",
+							 "subheading": 	"Here's another picture of me.",
+							 "image":				"img/ProfilePic.jpg",
+							 "text":				"txt/jrhAgain.txt"
 							}]
 }

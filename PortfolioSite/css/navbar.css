@@ -38,6 +38,13 @@
 	background-color: green;
 }
 
+.submenu{
+	position: absolute;
+	top: 0;
+	left: -50px;
+	box-shadow: 0px 10px 10px black;
+}
+
 #navIcon{
 	float: right;
 	text-align: center;
