@@ -12,7 +12,8 @@
 	padding: 0;
 	z-index: 1000;
 }
-#navMenu{
+
+.navMenu{
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -22,17 +23,17 @@
 		background-color: lightgreen;
 }
 
-#navMenu li{
+.navMenu li{
 	font-size: 16pt;
   text-align: center;
 	cursor: pointer;
 }
 
-#navMenu .bottom{
+.navMenu .bottom{
 		border-radius: 0px 0px 0px 10px;
 }
 
-#navMenu li.active, #navMenu li:hover{
+.navMenu li.active, #navMenu li:hover{
 	color: white;
 	background-color: green;
 }

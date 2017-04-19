@@ -65,7 +65,16 @@ function loadScreens(){
 							
 							newScreen.find('.pic').click(zoomIn);
 							
+							var newMenuItem = $(result.menuItems[i]);
+							
+							newMenuItem.click(function(e){
+								var $this = $(this);
+								e.preventDefault();
+								moveToScreen([$this.data('target')]);
+							});
+							
 							$('body').append(newScreen);
+							$('#main.navMenu').append(newMenuItem);
 						}
 					}
 				 });
@@ -78,22 +87,27 @@ function moveToScreen(targets){
 	var target = $('#'+targets[0]);
 	console.dir(target);
 	
+	target.css('display','block');
+	
 	var newTopVal = $(window).height()+1;
 	if(targets[0] > currentScreen.attr('id')){
-		console.log("BOOP");
 		target.css('top', newTopVal);
 		newTopVal = -newTopVal -currentScreen.height();
 	}
+	else{
+		target.css('display','block');
+		target.css('top', -newTopVal -currentScreen.height());
+	}
 	
-	$('#navMenu .active').removeClass('active');
-	$('#navMenu li[data-target='+targets[0]+']').addClass('active');
+	$('.navMenu .active').removeClass('active');
+	$('.navMenu li[data-target='+targets[0]+']').addClass('active');
 	
 	$(window).scrollTop(0);
 	$(document).scrollTop(0);
 	console.log('newTopVal',newTopVal);
 	console.log('target',targets[0]);
 	$('body').css('overflow', 'hidden');
-	target.css('display','block');
+	//target.css('display','block');
 	console.log($(window).scrollTop());
 		currentScreen.animate({top:newTopVal},500,"swing",function(){
 			console.log('top',currentScreen.css('top'));
@@ -136,13 +150,6 @@ $(document).ready(function(){
 	setTimeout(function(){introAnim();},200);
 	loadScreens();
 	
-	$('#navMenu li').click(function(e){
-		var $this = $(this);
-		e.preventDefault();
-		$this.addClass('active');
-		moveToScreen([$this.data('target')]);
-	});
-	
 	$('#navSpace').click(function(){
 		var $this = $(this);
 		if($this.hasClass('navClosed')){
@@ -150,7 +157,7 @@ $(document).ready(function(){
 			$('#navIcon *').fadeOut(500,function(){
 					$('#navIcon').slideUp(500,function(){
 					$('#navIcon').hide();
-					$('#navMenu').slideDown(500);
+					$('#main.navMenu').slideDown(500);
 				});
 			});
 		}

@@ -2,7 +2,7 @@
 	if($_SERVER['REQUEST_METHOD'] == 'POST'){
 		$screens = json_decode(file_get_contents('./screens.json'))->screens;
 		
-		$returnObj = ["menuCategories" => [],
+		$returnObj = ["menuItems" => [],
 									"screens" => 				[]];
 		
 		$numScreens = count($screens);
@@ -27,14 +27,17 @@
 				$classes .= " firstScreen";
 				$newPrevButton = "";
 				$newNextButton = "<div class='button nextButton' data-target=".($i+1).">&#8681;</div>";
+				$returnObj["menuItems"][] = "<li class='active' data-target=".$i.">".$screens[$i]->name."</li>";
 			}
 			else if($i == $numScreens-1){
 				$newPrevButton = "<div class='button prevButton' data-target=".($i-1).">&#8679;</div>";
 				$newNextButton = "";
+				$returnObj["menuItems"][] = "<li class='bottom' data-target=".$i.">".$screens[$i]->name."</li>";
 			}
 			else{
 				$newPrevButton = "<div class='button prevButton' data-target=".($i-1).">&#8679;</div>";
 				$newNextButton = "<div class='button nextButton' data-target=".($i+1).">&#8681;</div>";
+				$returnObj["menuItems"][] = "<li data-target=".$i.">".$screens[$i]->name."</li>";
 			}
 			
 			$newScreen = "<div id=".$i." class='".$classes."'>".
