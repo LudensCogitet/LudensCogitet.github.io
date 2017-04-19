@@ -1,7 +1,9 @@
 <?php
 	if($_SERVER['REQUEST_METHOD'] == 'POST'){
 		$screens = json_decode(file_get_contents('./screens.json'))->screens;
-		$htmlScreens = [];
+		
+		$returnObj = ["menuCategories" => [],
+									"screens" => 				[]];
 		
 		$numScreens = count($screens);
 		
@@ -50,9 +52,9 @@
 											"</div>".
 											$newNextButton.
 										"</div>";
-			$htmlScreens[] = $newScreen;
+			$returnObj["screens"][] = $newScreen;
 		}
 		
-		echo json_encode($htmlScreens,JSON_UNESCAPED_SLASHES);
+		echo json_encode($returnObj,JSON_UNESCAPED_SLASHES);
 	}
 ?>

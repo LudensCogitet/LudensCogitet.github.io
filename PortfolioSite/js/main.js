@@ -48,15 +48,15 @@ function loadScreens(){
 					url: "getScreens.php",
 					error: function(){$('body').append($('<h1>Sorry about this, but something\'s gone wrong.</h1>'));},
 					success: function(result){
-						console.log(result);
-						result = JSON.parse(result);
 						
-						for(let i = 0; i < result.length; i++){
-							if(result.length > 2 && i == 2 || i == result.length-1){
+						result = JSON.parse(result);
+						console.log(result);
+						for(let i = 0; i < result.screens.length; i++){
+							if(result.screens.length > 2 && i == 2 || i == result.screens.length-1){
 								currentScreen = $('.firstScreen');
 							}
 							
-							var newScreen = $(result[i]);
+							var newScreen = $(result.screens[i]);
 							
 							newScreen.find('.button').click(function(e){
 								e.preventDefault();
