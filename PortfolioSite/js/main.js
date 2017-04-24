@@ -191,6 +191,6 @@ $(document).ready(function(){
 		currentScreen.css(setViewScreenTop($('.firstScreen')));
 		currentScreen.css('z-index',0);
 		background.bail();
-		$('#navSpace').show();
+		$('#main.navMenu').show();
 	});
 });
