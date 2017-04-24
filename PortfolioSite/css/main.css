@@ -113,12 +113,14 @@ body{
 .content{
 	font-size: 14pt;
 	margin: 0 auto;
+	border: 3px solid black;
 	box-shadow: 10px 10px 5px black;
 }
 
 .heading{
 	position: relative;
-	width: 70%;
+	width: 100%;
+	height: 100px;
 }
 
 .text{
@@ -133,6 +135,7 @@ body{
 	cursor: pointer;
 	background-color: lightgreen;
 	box-shadow: 10px 10px 5px black;
+	border: 3px solid black;
 }
 
 .button:hover{
@@ -142,24 +145,22 @@ body{
 
 .nextButton{
 	border-radius: 0px 0px 10px 10px;
+	border-top: 0;
 	/*bottom: -14px;*/
 }
 
 .prevButton{
 	border-radius: 10px 10px 0px 0px;
+	border-bottom: 0;
 	/*top: -33px;*/
 }
 
 .heading h1{
-	display: block;
-	width: 70%;
-	margin: 0px 10px 10px 10px;
+	margin: 0px 0px 10px 10px;
 }
 
 .heading h3{
-	display: block;
-	width: 90%;
-	margin: 10px 10px 10px 10px;
+	margin: 10px 0px 10px 10px;
 }
 
 .darker{
@@ -182,14 +183,26 @@ body{
 .pic{
 	max-width: 40%;
 	float: right;
-	margin: 10px 10px 10px 10px;
+	margin: 10px -3px -3px 10px;
 }
 
-/*.picZoom{
-	width: 100%;
-	margin: 0;
-}*/
-	
+.infoLink{
+	display: inline-block;
+	float: right;
+	margin: 5px;
+	margin-top: 5px;
+	text-align: center;
+}
+
+.infoLink a{
+	color: black;
+	font-weight: bold;
+}
+
+.infoLink a:hover{
+	color: white;
+}
+
 @media (min-width: 1450px){
 	.content{
 			/*width: 1000px;*/

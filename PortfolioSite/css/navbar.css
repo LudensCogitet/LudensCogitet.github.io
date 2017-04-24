@@ -1,73 +1,52 @@
 #navSpace{
-	display: none;
 	position: fixed;
-	
-	width: 200px;
-	
-	left: 100%;
-	margin-left: -200px;
-
 	border-radius: 0px 0px 0px 10px;
+	
+	width: 500px;
+	left: 100%;
+	margin-left: -500px;
 	
 	padding: 0;
 	z-index: 1000;
 }
 
+#main.navMenu{
+	display: none;
+	float: right;
+}
+
 .navMenu{
+		
     list-style-type: none;
     margin: 0;
     padding: 0;
-		display: none;
-		border-radius: 0px 0px 0px 10px;
-		box-shadow: 10px 10px 10px black;
-		background-color: lightgreen;
 }
 
 .navMenu li{
 	font-size: 16pt;
   text-align: center;
 	cursor: pointer;
+	display: inline-block;
+	min-width: 160px;
+	background-color: lightgreen;
+	color: black;
 }
 
-.navMenu .bottom{
-		border-radius: 0px 0px 0px 10px;
+.navMenu ul{
+	padding: 0;
+	margin: 0;
+}
+
+.submenu{
+	display: none;
+	position: absolute;
+}
+
+.submenu li{
+	display: block;
 }
 
 .navMenu li.active, #navMenu li:hover{
 	color: white;
 	background-color: green;
-}
-
-.submenu{
-	position: absolute;
-	top: 0;
-	left: -50px;
-	box-shadow: 0px 10px 10px black;
-}
-
-#navIcon{
-	float: right;
-	text-align: center;
-	width: 100px;
-	height: 100px;
-	margin: 0;
-	padding: 0;
-	border-radius: 0px 0px 0px 10px;
-	box-shadow: 10px 10px 10px black;
-	background-color: lightgreen;
-}
-
-#navIcon:hover{
-	background-color: green;
-}
-
-#navIcon:hover div{
-	border-bottom-color: white;
-}
-
-#navIcon div{
-	padding-top: 19px;
-	margin-left: 20px;
-	margin-right: 20px;
-	border-bottom: 8px solid black;
 }
