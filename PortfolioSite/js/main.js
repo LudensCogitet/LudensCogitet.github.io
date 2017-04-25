@@ -115,7 +115,7 @@ function loadScreens(){
 							
 							newScreen.find('.pic').click(zoomIn);
 							
-							$('body').append(newScreen);
+							$('#siteSpace').append(newScreen);
 							
 						}
 					}
@@ -130,7 +130,7 @@ function moveToScreen(targets){
 		var target = $('#'+targets[0]);
 		console.dir(target);
 		
-		$('body').css('overflow', 'hidden');
+		$('#siteSpace').css('overflow', 'hidden');
 		target.css('display','block');
 			
 	
@@ -143,7 +143,8 @@ function moveToScreen(targets){
 			target.css('display','block');
 			target.css('top', -newTopVal -(target.height()));
 		}
-		$(window).scrollTop(0);
+		
+		$('#siteSpace').scrollTop(0);
 		
 		setTimeout(function(){
 			currentScreen.animate({top:newTopVal},500,"swing",function(){
@@ -151,7 +152,7 @@ function moveToScreen(targets){
 				currentScreen.css('display','none');
 				target.animate(setViewScreenTop(target),500,"swing",function(){
 					currentScreen = target;
-					$('body').css('overflow','auto');
+					$('#siteSpace').css('overflow','auto');
 					if(targets.length > 1){
 						targets.shift();
 						moveToScreen(targets);
