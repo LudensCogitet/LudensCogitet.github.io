@@ -1,6 +1,5 @@
 #navSpace{
 	position: fixed;
-	border-radius: 0px 0px 0px 10px;
 	
 	width: 500px;
 	left: 100%;
@@ -16,7 +15,6 @@
 }
 
 .navMenu{
-		
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -46,7 +44,37 @@
 	display: block;
 }
 
-.navMenu li.active, #navMenu li:hover{
+.navMenu li.active, .navMenu li:hover{
 	color: white;
 	background-color: green;
+}
+
+.arrow img{
+	width: 25px;
+	height: 25px;
+}
+
+#menuButton{
+	display: none;
+	background-color: lightgreen;
+}
+
+@media (max-width: 1000px){
+	#menuButton{
+		width: 100%;
+		text-align: center;
+	}
+	#navSpace{
+		width: 100%;
+		left: 0;
+		margin-left: 0;
+	}
+	
+	.navMenu{
+		width: 100%;
+	}
+	
+	.navMenu li{
+		display: block;
+	}
 }

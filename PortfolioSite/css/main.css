@@ -113,7 +113,8 @@ body{
 .content{
 	font-size: 14pt;
 	margin: 0 auto;
-	border: 3px solid black;
+	border-top: 3px solid black;
+	border-bottom: 3px solid black;
 	box-shadow: 10px 10px 5px black;
 }
 
@@ -203,15 +204,27 @@ body{
 	color: white;
 }
 
-@media (min-width: 1450px){
-	.content{
-			/*width: 1000px;*/
-		}
+.infoLink img{
+		height: 32px;
+		width: 32px;
+}
+
+@media (min-width: 1001px){
 	.screen{
 		width: 1000px;
 		left: 50%;
 		margin-left: -500px;
 		/*height: 100vh;*/
+	}
+	
+	.infoLink img{
+		height: 64px;
+		width: 64px;
+	}
+	
+	.content{
+		border-left: 3px solid black;
+		border-right: 3px solid black;
 	}
 }
 

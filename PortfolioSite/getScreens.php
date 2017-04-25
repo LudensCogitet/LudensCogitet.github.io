@@ -11,7 +11,7 @@
 		
 		for($i = 0; $i < $numScreens; $i++){
 			if(array_key_exists("START",$screens[$i])){
-				$returnObj["menu"] .= "<li class='category'>".$screens[$i]->START."<span class='arrowRight'>&#128898;</span><span class='arrowDown' style='display: none;'>&#128899;</span><ul class='navMenu submenu'>";
+				$returnObj["menu"] .= "<li class='category'>".$screens[$i]->START."<span class='arrow right'><img src='img/rightArrow.png'></span><span class='arrow down' style='display: none;'><img src='img/downArrow.png'></span><ul class='navMenu submenu'>";
 			}
 			else if(array_key_exists("END",$screens[$i])){
 				$returnObj["menu"] .= "</ul></li>";
@@ -57,7 +57,7 @@
 				}
 				
 				if(array_key_exists('liveDemoLink',$screens[$i])){
-					$liveDemoLink = "<div class='infoLink'><a title='Check out the app in action' target='_blank' href='".$screens[$i]->liveDemoLink."'><div><img width=64 height=64 src='img/bigPlay.png'><div>Live Demo</div></div></a></div>";
+					$liveDemoLink = "<div class='infoLink'><a title='Check out the app in action' target='_blank' href='".$screens[$i]->liveDemoLink."'><div><img src='img/bigPlay.png'><div>Demo</div></div></a></div>";
 				}
 				
 				$newScreen = "<div id=".$d." class='".$classes."'>".

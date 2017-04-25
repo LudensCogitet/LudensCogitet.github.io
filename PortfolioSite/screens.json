@@ -16,7 +16,7 @@
 							},
 							{"START":				"My Boy"},
 							{"name":				"Jack!",
-							 "heading": 		"HAR HAR HAR",
+							 "heading": 		"Projects",
 							 "subheading": 	"lolololol",
 							 "image":				"img/Jack.jpg",
 							 "text":				"txt/jack.txt"
@@ -37,8 +37,8 @@
 							},
 							{"END":					"Things"},
 							{"END":					"Projects"},
-							{"name":				"Me Again",
-							 "heading": 		"John Hiner Again",
+							{"name":				"Contact",
+							 "heading": 		"Contact",
 							 "subheading": 	"Here's another picture of me.",
 							 "image":				"img/ProfilePic.jpg",
 							 "text":				"txt/jrhAgain.txt"
