@@ -133,7 +133,7 @@ function moveToScreen(targets){
 		$('body').css('overflow', 'hidden');
 		target.css('display','block');
 			
-		
+	
 		var newTopVal = $(window).height()+50;
 		if(targets[0] > currentScreen.attr('id')){
 			target.css('top', newTopVal);
@@ -143,21 +143,22 @@ function moveToScreen(targets){
 			target.css('display','block');
 			target.css('top', -newTopVal -(target.height())+50);
 		}
-		
 		$(window).scrollTop(0);
-
-		currentScreen.animate({top:newTopVal},500,"swing",function(){
-			console.log('top',currentScreen.css('top'));
-			currentScreen.css('display','none');
-			target.animate(setViewScreenTop(target),500,"swing",function(){
-				currentScreen = target;
-				$('body').css('overflow','auto');
-				if(targets.length > 1){
-					targets.shift();
-					moveToScreen(targets);
-				}
+		
+		setTimeout(function(){
+			currentScreen.animate({top:newTopVal},500,"swing",function(){
+				console.log('top',currentScreen.css('top'));
+				currentScreen.css('display','none');
+				target.animate(setViewScreenTop(target),500,"swing",function(){
+					currentScreen = target;
+					$('body').css('overflow','auto');
+					if(targets.length > 1){
+						targets.shift();
+						moveToScreen(targets);
+					}
+				});
 			});
-		});
+		},50);
 	}
 }
 
