@@ -134,14 +134,14 @@ function moveToScreen(targets){
 		target.css('display','block');
 			
 		
-		var newTopVal = $(window).height()+1;
+		var newTopVal = $(window).height()+50;
 		if(targets[0] > currentScreen.attr('id')){
 			target.css('top', newTopVal);
-			newTopVal = -newTopVal -currentScreen.height();
+			newTopVal = -newTopVal -(currentScreen.height()+50);
 		}
 		else{
 			target.css('display','block');
-			target.css('top', -newTopVal -target.height());
+			target.css('top', -newTopVal -(target.height())+50);
 		}
 		
 		$(window).scrollTop(0);
