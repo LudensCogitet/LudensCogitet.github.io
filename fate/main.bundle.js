@@ -23,33 +23,34 @@ let objectNames = [];
 // 'remainder of division by': 'modulo'
 
 function resolveModifier(subject) {
-	if(!subject.modifier) return subject.value;
+	if(!subject.modifier) return resolveValue(subject);
 
 	let {operation} = subject.modifier;
 	let operand = resolveOperand(subject.modifier.operand);
 
 	if(operation === 'add')
-		return Number(subject.value) + Number(operand);
+		return {value: Number(resolveValue(subject)) + Number(operand)};
 	if(operation === 'subtract')
-		return Number(subject.value) - Number(operand);
+		return {value: Number(resolveValue(subject)) - Number(operand)};
 	if(operation === 'divide')
-		return Number(subject.value) / Number(operand);
+		return {value: Number(resolveValue(subject.value)) / Number(operand)};
 	if(operation === 'multiply')
-		return Number(subject.value) * Number(operand);
+		return {value: Number(resolveValue(subject)) * Number(operand)};
 	if(operation === 'modulo')
-		return Number(subject.value) % Number(operand);
+		return {value: Number(resolveValue(subject.value)) % Number(operand)};
 }
 
 function resolveValue(operand) {
-	if(operand.value) {
-		let value = Number(operand.value);
-		if(value || value === 0) return value;
-		else {
-			return operand.value;
-		}
+	if(operand.variable) {
+		return resolveValue(world.variables[operand.variable]);
 	}
 
-	if(operand.variable) return resolveValue(world.variables[operand.variable]);
+	let value = Number(operand.value);
+	if(value || value === 0) {
+		return value;
+	} else {
+		return operand.value;
+	}
 }
 
 function resolveOperand(operand) {
@@ -118,7 +119,7 @@ function processMove(subject) {
 }
 
 function processSet(subject) {
-	world.variables[resolveOperand(subject[0])] = subject[1];
+	world.variables[resolveOperand(subject[0])] = resolveOperand(subject[1]);
 }
 
 function processList(subject) {
@@ -178,6 +179,7 @@ function checkPlayerMoved() {
 	if(!playerMoved) return;
 	playerMoved = false;
 	command = '#enter';
+	response = [];
 	process(world.places[world.things['#player'].location]);
 }
 
@@ -292,7 +294,7 @@ webpackEmptyAsyncContext.id = "./src/$$_lazy_route_resource lazy recursive";
 /***/ "./src/app/app.component.css":
 /***/ (function(module, exports) {
 
-module.exports = ".container {\n\tdisplay: -webkit-box;\n\tdisplay: -ms-flexbox;\n\tdisplay: flex;\n\t-webkit-box-pack: center;\n\t    -ms-flex-pack: center;\n\t        justify-content: center;\n\n\theight: 90vh;\n}\n\n.inner-container {\n\tdisplay: -webkit-box;\n\tdisplay: -ms-flexbox;\n\tdisplay: flex;\n\t-webkit-box-orient: vertical;\n\t-webkit-box-direction: normal;\n\t    -ms-flex-direction: column;\n\t        flex-direction: column;\n\tbackground-color: black;\n\theight: 100%;\n\twidth: 411px;\n\n\tpadding: 10px 10px 10px 10px\n}\n\n.text {\n\t-webkit-box-flex: 1;\n\t    -ms-flex-positive: 1;\n\t        flex-grow: 1;\n\toverflow: auto;\n}\n\n.commands {\n\tborder-top: 2px solid green;\n\tpadding-top: 10px;\n\ttext-align: center;\n\t-webkit-user-select: none;\n\t   -moz-user-select: none;\n\t    -ms-user-select: none;\n\t        user-select: none;\n}\n\n.commands span {\n\tmargin-left: 10px;\n\tmargin-right: 10px;\n}\n"
+module.exports = ".container {\n\tdisplay: -webkit-box;\n\tdisplay: -ms-flexbox;\n\tdisplay: flex;\n\t-webkit-box-pack: center;\n\t    -ms-flex-pack: center;\n\t        justify-content: center;\n\theight: 100vh;\n}\n\n.inner-container {\n\tdisplay: -webkit-box;\n\tdisplay: -ms-flexbox;\n\tdisplay: flex;\n\t-webkit-box-orient: vertical;\n\t-webkit-box-direction: normal;\n\t    -ms-flex-direction: column;\n\t        flex-direction: column;\n\tbackground-color: black;\n\n\theight: 480px;\n\twidth: 380px;\n\tmargin: auto;\n\n\tborder: 2px solid green;\n\n\tpadding: 10px 10px 10px 10px\n}\n\n.text {\n\t-webkit-box-flex: 1;\n\t    -ms-flex-positive: 1;\n\t        flex-grow: 1;\n\toverflow: auto;\n}\n\n.commands {\n\tborder-top: 2px solid green;\n\tpadding-top: 10px;\n\ttext-align: center;\n\t-webkit-user-select: none;\n\t   -moz-user-select: none;\n\t    -ms-user-select: none;\n\t        user-select: none;\n}\n\n.commands span {\n\tmargin-left: 10px;\n\tmargin-right: 10px;\n}\n"
 
 /***/ }),
 
@@ -335,6 +337,7 @@ var AppComponent = /** @class */ (function () {
         this.gameStateSub = this.fateService.$gameState.subscribe(function (gameState) {
             if (!gameState)
                 return;
+            console.log(gameState);
             if (!_this.keywords) {
                 _this.getKeywords(gameState);
             }
@@ -347,14 +350,14 @@ var AppComponent = /** @class */ (function () {
                     _this.paragraphs.push(_this.getAliases(gameState.currentLocation.description).split(' '));
                 }
                 else {
-                    _this.paragraphs.push(["\"" + gameState.lastCommandDisplay + "\""]);
+                    _this.paragraphs.push([">> \"" + gameState.lastCommandDisplay + "\""]);
                 }
                 gameState.response.split('<p>').forEach(function (paragraph) {
                     _this.paragraphs.push(_this.getAliases(paragraph).split(' '));
                 });
             }
             else {
-                _this.paragraphs.push(["\"" + gameState.lastCommandDisplay + "\""]);
+                _this.paragraphs.push([">> \"" + gameState.lastCommandDisplay + "\""]);
             }
         });
         this.fateService.load(__WEBPACK_IMPORTED_MODULE_2__assets_world__["a" /* world */]);
@@ -376,6 +379,8 @@ var AppComponent = /** @class */ (function () {
     };
     AppComponent.prototype.getAliases = function (text, storage) {
         if (storage === void 0) { storage = this.aliases; }
+        if (!text)
+            return '';
         var match = text.match(/{(.*)\|(.*)}/);
         while (match) {
             storage.push({ display: match[1], content: match[2] });
@@ -459,14 +464,14 @@ var AppModule = /** @class */ (function () {
 /***/ "./src/app/clickable/clickable.component.css":
 /***/ (function(module, exports) {
 
-module.exports = "button {\n\tcolor: green;\n\tbackground-color: black;\n\tmargin: 5px 5px 5px 5px;\n\tpadding: 10px 10px 10px 10px;\n\tborder-color: green;\n\tborder-radius: 2px;\n}\n\nbutton:hover {\n\tbackground-color: green;\n\tcolor: black;\n}\n\nbutton:active {\n\tbackground-color: green;\n\tcolor: white;\n}\n\nspan {\n\tcolor: green;\n}\n\nspan:hover {\n\tcolor: white;\n\tcursor: pointer;\n}\n\n.selected {\n\tcolor: white;\n\tfont-size: 1.1em;\n\tfont-weight: bold;\n}\n"
+module.exports = "button {\n\tcolor: green;\n\tbackground-color: black;\n\tmargin: 5px 5px 5px 5px;\n\tpadding: 10px 10px 10px 10px;\n\tborder-color: green;\n\tborder-radius: 2px;\n}\n\nbutton:hover {\n\tbackground-color: green;\n\tcolor: black;\n}\n\nbutton:active {\n\tbackground-color: green;\n\tcolor: white;\n}\n\nspan {\n\tcolor: green;\n}\n\n.clickable:hover {\n\tcolor: white;\n\tcursor: pointer;\n}\n\n.selected {\n\tcolor: white;\n\tfont-weight: bold;\n}\n"
 
 /***/ }),
 
 /***/ "./src/app/clickable/clickable.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span *ngIf=\"!isButton\" [ngClass]=\"{selected: selected}\" (click)=\"clicked()\">{{display}}</span>\n<button *ngIf=\"isButton\" [ngClass]=\"{selected: selected}\" (click)=\"clicked()\">{{display}}</button>\n"
+module.exports = "<span *ngIf=\"!isButton\" [ngClass]=\"{selected: selected, clickable: clickable}\" (click)=\"clicked()\">{{display}}</span>\n<button *ngIf=\"isButton\" [ngClass]=\"{selected: selected}\" (click)=\"clicked()\">{{display}}</button>\n"
 
 /***/ }),
 
@@ -496,11 +501,16 @@ var ClickableComponent = /** @class */ (function () {
     }
     ClickableComponent.prototype.ngOnInit = function () {
         var _this = this;
+        if (this.data.content.slice(0, 2) === '>>') {
+            this.clickable = false;
+        }
+        else {
+            this.clickable = true;
+        }
         this.display = this.data.display || this.data.content;
         this.content = this.data.content.replace(/[.,:]/g, '');
         this.gameStateSub = this.fateService.$gameState.subscribe(function (gameState) {
             _this.selected = false;
-            console.log("hello");
         });
     };
     ClickableComponent.prototype.ngOnDestroy = function () {
@@ -508,8 +518,9 @@ var ClickableComponent = /** @class */ (function () {
             this.gameStateSub.unsubscribe();
     };
     ClickableComponent.prototype.clicked = function () {
+        if (!this.clickable)
+            return;
         this.selected = !this.selected;
-        console.log("CONTENT", this.content);
         if (this.selected) {
             this.fateService.move({ display: this.display, content: this.content });
         }
@@ -614,7 +625,7 @@ var FateService = /** @class */ (function () {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return world; });
-var world = "{\"#anywhere\":{\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"check inventory\"}]},\"then\":{\"list\":{\"location\":{\"value\":\"#player\"},\"phrase\":{\"value\":\"You have #thing.\"}}}},{\"if\":{\"eq\":[{\"modifier\":{\"operation\":\"modulo\",\"operand\":{\"variable\":\"time_cycle_length\"}},\"variable\":\"#turn\"},{\"value\":\"0\"}]},\"then\":{\"if\":{\"eq\":[{\"variable\":\"time_of_day\"},{\"value\":\"day\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"time_of_day\"},{\"value\":\"night\"}]},{\"say\":[{\"value\":\"<p>The morning sun has vanquished the horrible night.<p>\"}]}]},\"else\":{\"if\":{\"eq\":[{\"variable\":\"time_of_day\"},{\"value\":\"night\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"time_of_day\"},{\"value\":\"day\"}]},{\"say\":[{\"value\":\"<p>What a horrible night to have a curse.<p>\"}]}]}}}}]},\"places\":{\"pedestal_room\":{\"description\":{\"value\":\"{Pedestal Room|pedestal_room}\"},\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go north\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go to the other room\"}]}],\"then\":{\"travel\":{\"value\":\"cube_room\"}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go south\"}]},\"then\":{\"if\":{\"eq\":[{\"variable\":\"cube_in_pedestal\"},{\"value\":\"true\"}]},\"then\":{\"travel\":{\"value\":\"you_win\"}}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"say\":[{\"value\":\"You are standing in a small circular room with bare white walls.\"}]},{\"if\":{\"eq\":[{\"variable\":\"cube_in_pedestal\"},{\"value\":\"false\"}]},\"then\":{\"say\":[{\"value\":\"In the center of the room is a small, waist-high pedestal with a square depression in the center.\"}]}},{\"if\":{\"eq\":[{\"variable\":\"cube_in_pedestal\"},{\"value\":\"true\"}]},\"then\":{\"say\":[{\"value\":\"In the center of the room is a small, waist-high pedestal. A matte black {cube|strange_cube} sits in a square depression in the center.\"}]}},{\"say\":[{\"value\":\"To the north a doorway leads into another small room beyond.\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"strange_cube pedestal\"}]},\"then\":{\"if\":{\"eq\":[{\"variable\":\"cube_in_pedestal\"},{\"value\":\"false\"}]},\"then\":{\"if\":{\"in\":[{\"value\":\"strange_cube\"},{\"value\":\"#player\"}]},\"then\":{\"do\":[{\"say\":[{\"say\":[{\"value\":\"You place the {cube|strange_cube} in the depression on the pedestal.\"}]},{\"say\":[{\"value\":\"It slides in easily and clicks into place.\"}]},{\"set\":[{\"value\":\"cube_in_pedestal\"},{\"value\":\"true\"}]},{\"move\":[{\"value\":\"strange_cube\"},{\"value\":\"#here\"}]}]}]}}}}]},\"cube_room\":{\"description\":{\"value\":\"{Alcove|cube_room}\"},\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go south\"}]},\"then\":{\"travel\":{\"value\":\"pedestal_room\"}}},{\"if\":{\"in\":[{\"value\":\"strange_cube\"},{\"value\":\"#here\"}]},\"then\":{\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"value\":\"A small black {cube|strange_cube} sits in an alcove in this otherwise featureless room.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use strange_cube\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"You take the {cube|strange_cube}.\"}]},{\"move\":[{\"value\":\"strange_cube\"},{\"value\":\"#player\"}]}]}}]}},{\"if\":{\"nin\":[{\"value\":\"strange_cube\"},{\"value\":\"#here\"}]},\"then\":{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"value\":\"An empty alcove is the only notable feature of this otherwise featureless room.\"}]}}}]},\"you_win\":{\"description\":{\"value\":\"{You Win!|you_win}\"},\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"value\":\"YOU WIN!\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go north\"}]},\"then\":{\"travel\":{\"value\":\"pedestal_room\"}}}]}},\"things\":{\"#player\":{\"location\":\"pedestal_room\"},\"strange_cube\":{\"location\":\"cube_room\",\"description\":\"{a small black cube|strange_cube}\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine strange_cube\"}]},\"then\":{\"say\":[{\"value\":\"It's a small matte black {cube|strange_cube}, perfectly smooth and about 2 inches on a side\"}]}}]}},\"variables\":{\"cube_in_pedestal\":{\"value\":\"false\"},\"time_cycle_length\":{\"value\":\"7\"},\"time_of_day\":{\"value\":\"day\"},\"#turn\":{\"value\":\"1\"}},\"settings\":{\"registerTurn\":\"input\",\"commandsPerTurn\":\"2\",\"keywords\":[{\"keyword\":\"use\"},{\"keyword\":\"examine\"},{\"keyword\":\"look around\"},{\"keyword\":\"{inventory|check inventory}\"},{\"keyword\":\"{north|go north}\"},{\"keyword\":\"{south|go south}\"},{\"keyword\":\"{east|go east}\"},{\"keyword\":\"{west|go west}\"}]}}";
+var world = "{\"#anywhere\":{\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"check inventory\"}]},\"then\":{\"list\":{\"location\":{\"value\":\"#player\"},\"phrase\":{\"value\":\"You have #thing.\"}}}},{\"if\":{\"eq\":[{\"variable\":\"_street_escaped\"},{\"value\":\"false\"}]},\"then\":{\"do\":[{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"3\"}]},\"then\":{\"say\":[{\"value\":\"<p>The wind is beginning to howl.<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"6\"}]},\"then\":{\"say\":[{\"value\":\"<p>You sense It drawing near.<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"9\"}]},\"then\":{\"say\":[{\"value\":\"<p>\\\"God save me... It's here...\\\"<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"10\"}]},\"then\":{\"travel\":{\"value\":\"_street_death\"}}}]}}]},\"places\":{\"_intro\":{\"description\":\"\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"A shadow hunts you. What had been but a vague and lurking fear, a scratching at the outer wall of the conscious mind,\"}]},{\"say\":[{\"value\":\"become a sudden reality after that terrible ritual. It had been folly to participate, you knew that now. And perhaps it had\"}]},{\"say\":[{\"value\":\"even been a trap set by Willem to destroy you, or to feed the thing? You could only guess, and there was no time now for guessing.<p>\"}]},{\"say\":[{\"value\":\"Only flight.<p>\"}]},{\"say\":[{\"value\":\"{Continue...|_intro_next 1}\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"_intro_next 1\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"The Thing is only a step behind, but somehow you've made it this far. Dusk has fallen and you stand in the very street where\"}]},{\"say\":[{\"value\":\"Dr. Walter Sinclar lives; an expert in the occult and the only hope you have of freedom from your eldrich pursuer.\"}]},{\"say\":[{\"value\":\"Still clutching his letter in your hand, you stare wildly about you for the proper house.<p>\"}]},{\"say\":[{\"value\":\"{Continue...|_intro_next 2}\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"_intro_next 2\"}]},\"then\":{\"travel\":{\"value\":\"_street\"}}}]},\"_street\":{\"description\":{\"value\":\"{A Darkened Street|_street}\"},\"do\":[{\"set\":[{\"value\":\"_street_num_turns\"},{\"modifier\":{\"operation\":\"add\",\"operand\":{\"value\":\"1\"}},\"variable\":\"_street_num_turns\"}]},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"value\":\"Great and imposing houses stand back from the pavement to the right and left of the empty street.\"}]}}]},\"_street_death\":{\"description\":{\"value\":\"You have died...\"},\"do\":[{\"say\":[{\"value\":\"<p>Too long in the open, and without Dr. Sinclar's aid, the horrible shadow has consumed you.<p>\"}]},{\"say\":[{\"value\":\"(Refresh the page to play again)\"}]}]}},\"things\":{\"#player\":{\"location\":\"_intro\"},\"_sinclar_letter\":{\"location\":\"#player\",\"description\":\"{a letter from Dr. Walter Sinclar|_sinclar_letter}\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _sinclar_letter\"}]},\"then\":{\"if\":{\"in\":[{\"value\":\"_sinclar_letter\"},{\"value\":\"#player\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"\\\"Dear Mr. Smith<p>\"}]},{\"say\":[{\"value\":\"I have learned of your plight. Make no mistake, you are in grave danger.\"}]},{\"say\":[{\"value\":\"However, I believe I can help you. Come to my home on Mayfair Street at once, number 385.<p>\"}]},{\"say\":[{\"value\":\"Do not delay.\\\"\"}]}]}}}]}},\"variables\":{\"_street_num_turns\":{\"value\":\"0\"},\"_street_escaped\":{\"value\":\"false\"},\"#turn\":{\"value\":\"1\"}},\"settings\":{\"keywords\":[{\"keyword\":\"use\"},{\"keyword\":\"examine\"},{\"keyword\":\"look around\"},{\"keyword\":\"{inventory|check inventory}\"},{\"keyword\":\"{north|go north}\"},{\"keyword\":\"{south|go south}\"},{\"keyword\":\"{east|go east}\"},{\"keyword\":\"{west|go west}\"}]}}";
 
 
 /***/ }),
