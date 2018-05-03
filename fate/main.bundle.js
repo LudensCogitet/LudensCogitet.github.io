@@ -10,9 +10,14 @@ let world;
 let started = false;
 
 let command;
-let response = [];
 
-let playerMoved = false;
+let response = [];
+let roomEnterResponse = [];
+
+let interrupt;
+let clear;
+
+let travelToLocation;
 let actionTaken = false;
 let objectNames = [];
 
@@ -29,15 +34,15 @@ function resolveModifier(subject) {
 	let operand = resolveOperand(subject.modifier.operand);
 
 	if(operation === 'add')
-		return {value: Number(resolveValue(subject)) + Number(operand)};
+		return resolveValue(subject) + operand;
 	if(operation === 'subtract')
-		return {value: Number(resolveValue(subject)) - Number(operand)};
+		return resolveValue(subject) - operand;
 	if(operation === 'divide')
-		return {value: Number(resolveValue(subject.value)) / Number(operand)};
+		return resolveValue(subject) / operand;
 	if(operation === 'multiply')
-		return {value: Number(resolveValue(subject)) * Number(operand)};
+		return resolveValue(subject) * operand;
 	if(operation === 'modulo')
-		return {value: Number(resolveValue(subject.value)) % Number(operand)};
+		return resolveValue(subject) % operand;
 }
 
 function resolveValue(operand) {
@@ -68,6 +73,12 @@ function resolveOperand(operand) {
 	return resolveModifier(resolved);
 }
 
+function wrapOperand(operand) {
+	if(world.variables[operand]) return {variable: operand};
+
+	return {value: operand};
+}
+
 function processIf(subject) {
 	let comparisons = [subject.if];
 	let results = [];
@@ -89,22 +100,21 @@ function processIf(subject) {
 }
 
 function processDo(subject) {
-	subject.forEach(x => {
+	let toProcess = subject.function ? world.functions[resolveOperand(subject.function)] : subject;
+	toProcess.forEach(x => {
 		process(x);
 	});
 }
 
 function processTravel(subject) {
-	let newLocation = resolveOperand(subject);
-	world.things['#player'].location = newLocation;
-	playerMoved = true;
+	travelToLocation = resolveOperand(subject);
 }
 
 function processSay(subject) {
 	subject.forEach(x => {
 		let value = resolveOperand(x);
 		if(value) {
-			response.push(value);
+			command === '#enter' ? roomEnterResponse.push(value) : response.push(value);
 			return;
 		}
 		process(x);
@@ -119,15 +129,23 @@ function processMove(subject) {
 }
 
 function processSet(subject) {
-	world.variables[resolveOperand(subject[0])] = resolveOperand(subject[1]);
+	world.variables[resolveOperand(subject[0])] = wrapOperand(resolveOperand(subject[1]));
 }
 
 function processList(subject) {
-	let location = resolveValue(subject.location);
-	let phrase = resolveValue(subject.phrase);
-	let things = Object.keys(world.things).filter(x => world.things[x].location === location);
+	let location = resolveOperand(subject.location);
+	let phrase = resolveOperand(subject.phrase);
+	let things = Object.keys(world.things).filter(x => world.things[x].location === location && x !== '#player');
+
+	console.log("THINGS", things);
 
 	things.forEach(thing => response.push(phrase.replace('#thing', world.things[thing].description)));
+}
+
+function processClear(subject) {
+	console.log("CLEAR");
+	clear = true;
+	response = [];
 }
 
 function processAction(subject) {
@@ -136,19 +154,23 @@ function processAction(subject) {
 		"say": processSay,
 		"move": processMove,
 		"set": processSet,
-		"list": processList
+		"list": processList,
+		"clear": processClear
 	};
 
 	for(let action of Object.keys(actions)) {
 		if(subject[action]) {
 			actionTaken = true;
 			actions[action](subject[action]);
+			interrupt = subject[action].interrupt;
 			break;
 		}
 	}
 }
 
 function process(subject) {
+	console.log("SUBJECT", subject);
+	if(interrupt) return;
 	if(subject.do)
 		processDo(subject.do);
 	else if(subject.if){
@@ -176,11 +198,15 @@ function getThingsAtLocation(location) {
 }
 
 function checkPlayerMoved() {
-	if(!playerMoved) return;
-	playerMoved = false;
-	command = '#enter';
-	response = [];
-	process(world.places[world.things['#player'].location]);
+	if(!travelToLocation) return;
+
+	interrupt = false;
+	while(travelToLocation) {
+		world.things['#player'].location = travelToLocation;
+		travelToLocation = null;
+		command = '#enter';
+		process(world.places[world.things['#player'].location]);
+	}
 }
 
 function filterCommand(newCommand) {
@@ -241,9 +267,12 @@ function move(newCommand) {
 
 	checkPlayerMoved();
 
+	response = roomEnterResponse.concat(response);
 	let compiledResponse = !actionTaken ? world.settings.onBadCommand : response.join(' ');
 
 	response = [];
+	roomEnterResponse = [];
+	interrupt = false;
 
 	if((!world.settings.registerTurn || world.settings.registerTurn === 'input') || actionTaken) {
 		world.variables['#turn'].value = ((+world.variables['#turn'].value) + 1) + ''
@@ -256,8 +285,10 @@ function move(newCommand) {
 			name: world.things['#player'].location,
 			description: resolveValue(world.places[world.things['#player'].location].description)
 		},
-		actionTaken
+		actionTaken,
+		clear
 	};
+	clear = false;
 	actionTaken = false;
 	return packet;
 }
@@ -343,6 +374,10 @@ var AppComponent = /** @class */ (function () {
             }
             _this.lastRoom = _this.currentRoom;
             _this.currentRoom = gameState.currentLocation.name;
+            if (gameState.clear) {
+                _this.aliases = [];
+                _this.paragraphs = [];
+            }
             if (gameState.response) {
                 if (_this.lastRoom !== _this.currentRoom) {
                     _this.aliases = [];
@@ -371,21 +406,61 @@ var AppComponent = /** @class */ (function () {
     };
     AppComponent.prototype.extractWordData = function (text, storage) {
         if (storage === void 0) { storage = this.aliases; }
-        var match = text.match(/{([0-9]+)}/);
-        if (!match) {
+        if (text.startsWith('>>'))
             return { content: text };
+        var match = text.match(/\[([0-9]+?)\]/);
+        if (!match) {
+            var foundWord = text.match(/[\s,\w]+/);
+            if (!foundWord)
+                return { content: text };
+            var data_1 = { content: foundWord[0] };
+            var edges_1 = text.split(foundWord[0]);
+            if (!edges_1.length)
+                return data_1;
+            if (edges_1.length === 1) {
+                if (text.indexOf(edges_1[0]) < text.indexOf(foundWord[0]))
+                    data_1.before = edges_1[0];
+                else
+                    data_1.after = edges_1[0];
+            }
+            if (edges_1.length === 2) {
+                data_1.before = edges_1[0];
+                data_1.after = edges_1[1];
+            }
+            return data_1;
         }
-        return storage[+match[1]];
+        var stored = storage[+match[1]];
+        var data = {
+            display: stored.display,
+            content: stored.content
+        };
+        var edges = text.split(match[0]);
+        if (!edges)
+            return data;
+        if (edges.length === 1) {
+            if (text.indexOf(edges[0]) < text.indexOf(match[0]))
+                data.before = edges[0];
+            else
+                data.after = edges[0];
+        }
+        if (edges.length === 2) {
+            data.before = edges[0];
+            data.after = edges[1];
+        }
+        return data;
     };
     AppComponent.prototype.getAliases = function (text, storage) {
         if (storage === void 0) { storage = this.aliases; }
         if (!text)
             return '';
-        var match = text.match(/{(.*)\|(.*)}/);
+        var match = text.match(/({.*?\|.*?})/);
         while (match) {
-            storage.push({ display: match[1], content: match[2] });
-            text = text.replace(match[0], "{" + (storage.length - 1) + "}");
-            match = text.match(/{(.*)\|(.*)}/);
+            var split = match[1].split('|');
+            var display = split[0].slice(1);
+            var content = split[1].slice(0, -1);
+            storage.push({ display: display, content: content });
+            text = text.replace(match[0], "[" + (storage.length - 1) + "]");
+            match = text.match(/({.*?\|.*?})/);
         }
         return text;
     };
@@ -464,14 +539,14 @@ var AppModule = /** @class */ (function () {
 /***/ "./src/app/clickable/clickable.component.css":
 /***/ (function(module, exports) {
 
-module.exports = "button {\n\tcolor: green;\n\tbackground-color: black;\n\tmargin: 5px 5px 5px 5px;\n\tpadding: 10px 10px 10px 10px;\n\tborder-color: green;\n\tborder-radius: 2px;\n}\n\nbutton:hover {\n\tbackground-color: green;\n\tcolor: black;\n}\n\nbutton:active {\n\tbackground-color: green;\n\tcolor: white;\n}\n\nspan {\n\tcolor: green;\n}\n\n.clickable:hover {\n\tcolor: white;\n\tcursor: pointer;\n}\n\n.selected {\n\tcolor: white;\n\tfont-weight: bold;\n}\n"
+module.exports = "button {\n\tcolor: green;\n\tbackground-color: black;\n\tmargin: 5px 5px 5px 5px;\n\tpadding: 10px 10px 10px 10px;\n\tborder-color: green;\n\tborder-radius: 2px;\n}\n\nbutton:hover {\n\tbackground-color: green;\n\tcolor: black;\n}\n\nbutton:active {\n\tbackground-color: green;\n\tcolor: white;\n}\n\nspan {\n\tcolor: green;\n}\n\n.clickable:hover {\n\tcolor: white;\n\tcursor: pointer;\n}\n\n.selected {\n\tcolor: white;\n\tfont-weight: bold;\n}\n\n.standOut {\n\ttext-decoration: underline;\n}\n"
 
 /***/ }),
 
 /***/ "./src/app/clickable/clickable.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span *ngIf=\"!isButton\" [ngClass]=\"{selected: selected, clickable: clickable}\" (click)=\"clicked()\">{{display}}</span>\n<button *ngIf=\"isButton\" [ngClass]=\"{selected: selected}\" (click)=\"clicked()\">{{display}}</button>\n"
+module.exports = "<span *ngIf=\"!isButton\">\n\t{{data.before || ''}}<span [ngClass]=\"{selected: selected, clickable: clickable, standOut: isHighlighted}\" (click)=\"clicked()\">{{display}}</span>{{data.after || ''}}\n</span>\n<button *ngIf=\"isButton\" [ngClass]=\"{selected: selected}\" (click)=\"clicked()\">{{display}}</button>\n"
 
 /***/ }),
 
@@ -503,11 +578,15 @@ var ClickableComponent = /** @class */ (function () {
         var _this = this;
         if (this.data.content.slice(0, 2) === '>>') {
             this.clickable = false;
+            console.log("HARGE", this.data.content);
         }
         else {
             this.clickable = true;
         }
         this.display = this.data.display || this.data.content;
+        this.isHighlighted = this.display.startsWith('!!');
+        if (this.isHighlighted)
+            this.display = this.display.slice(2);
         this.content = this.data.content.replace(/[.,:]/g, '');
         this.gameStateSub = this.fateService.$gameState.subscribe(function (gameState) {
             _this.selected = false;
@@ -625,7 +704,7 @@ var FateService = /** @class */ (function () {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return world; });
-var world = "{\"#anywhere\":{\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"check inventory\"}]},\"then\":{\"list\":{\"location\":{\"value\":\"#player\"},\"phrase\":{\"value\":\"You have #thing.\"}}}},{\"if\":{\"eq\":[{\"variable\":\"_street_escaped\"},{\"value\":\"false\"}]},\"then\":{\"do\":[{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"3\"}]},\"then\":{\"say\":[{\"value\":\"<p>The wind is beginning to howl.<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"6\"}]},\"then\":{\"say\":[{\"value\":\"<p>You sense It drawing near.<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"9\"}]},\"then\":{\"say\":[{\"value\":\"<p>\\\"God save me... It's here...\\\"<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"10\"}]},\"then\":{\"travel\":{\"value\":\"_street_death\"}}}]}}]},\"places\":{\"_intro\":{\"description\":\"\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"A shadow hunts you. What had been but a vague and lurking fear, a scratching at the outer wall of the conscious mind,\"}]},{\"say\":[{\"value\":\"become a sudden reality after that terrible ritual. It had been folly to participate, you knew that now. And perhaps it had\"}]},{\"say\":[{\"value\":\"even been a trap set by Willem to destroy you, or to feed the thing? You could only guess, and there was no time now for guessing.<p>\"}]},{\"say\":[{\"value\":\"Only flight.<p>\"}]},{\"say\":[{\"value\":\"{Continue...|_intro_next 1}\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"_intro_next 1\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"The Thing is only a step behind, but somehow you've made it this far. Dusk has fallen and you stand in the very street where\"}]},{\"say\":[{\"value\":\"Dr. Walter Sinclar lives; an expert in the occult and the only hope you have of freedom from your eldrich pursuer.\"}]},{\"say\":[{\"value\":\"Still clutching his letter in your hand, you stare wildly about you for the proper house.<p>\"}]},{\"say\":[{\"value\":\"{Continue...|_intro_next 2}\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"_intro_next 2\"}]},\"then\":{\"travel\":{\"value\":\"_street\"}}}]},\"_street\":{\"description\":{\"value\":\"{A Darkened Street|_street}\"},\"do\":[{\"set\":[{\"value\":\"_street_num_turns\"},{\"modifier\":{\"operation\":\"add\",\"operand\":{\"value\":\"1\"}},\"variable\":\"_street_num_turns\"}]},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"value\":\"Great and imposing houses stand back from the pavement to the right and left of the empty street.\"}]}}]},\"_street_death\":{\"description\":{\"value\":\"You have died...\"},\"do\":[{\"say\":[{\"value\":\"<p>Too long in the open, and without Dr. Sinclar's aid, the horrible shadow has consumed you.<p>\"}]},{\"say\":[{\"value\":\"(Refresh the page to play again)\"}]}]}},\"things\":{\"#player\":{\"location\":\"_intro\"},\"_sinclar_letter\":{\"location\":\"#player\",\"description\":\"{a letter from Dr. Walter Sinclar|_sinclar_letter}\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _sinclar_letter\"}]},\"then\":{\"if\":{\"in\":[{\"value\":\"_sinclar_letter\"},{\"value\":\"#player\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"\\\"Dear Mr. Smith<p>\"}]},{\"say\":[{\"value\":\"I have learned of your plight. Make no mistake, you are in grave danger.\"}]},{\"say\":[{\"value\":\"However, I believe I can help you. Come to my home on Mayfair Street at once, number 385.<p>\"}]},{\"say\":[{\"value\":\"Do not delay.\\\"\"}]}]}}}]}},\"variables\":{\"_street_num_turns\":{\"value\":\"0\"},\"_street_escaped\":{\"value\":\"false\"},\"#turn\":{\"value\":\"1\"}},\"settings\":{\"keywords\":[{\"keyword\":\"use\"},{\"keyword\":\"examine\"},{\"keyword\":\"look around\"},{\"keyword\":\"{inventory|check inventory}\"},{\"keyword\":\"{north|go north}\"},{\"keyword\":\"{south|go south}\"},{\"keyword\":\"{east|go east}\"},{\"keyword\":\"{west|go west}\"}]}}";
+var world = "{\"#anywhere\":{\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"check inventory\"}]},\"then\":{\"list\":{\"location\":{\"value\":\"#player\"},\"phrase\":{\"value\":\"You have #thing.<p>\"}}}}]},\"places\":{\"_intro\":{\"description\":\"\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"A shadow hunts you. What had been but a vague and lurking fear, a scratching at the outer wall of the conscious mind,\"}]},{\"say\":[{\"value\":\"became a sudden reality after that terrible ritual. It had been folly to participate, you knew that now. And perhaps it had\"}]},{\"say\":[{\"value\":\"even been a trap set by Willem to destroy you, or to feed the thing? You could only guess, and there was no time now for guessing.<p>\"}]},{\"say\":[{\"value\":\"Only flight.<p>\"}]},{\"say\":[{\"value\":\"{Continue...|_intro_next 1}\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"_intro_next 1\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"The Thing is only a step behind, but somehow you've made it this far. Dusk has fallen and you stand in the very street where\"}]},{\"say\":[{\"value\":\"Dr. Walter Sinclar lives; an expert in the occult and the only hope you have of freedom from your eldrich pursuer.\"}]},{\"say\":[{\"value\":\"Still clutching his letter in your hand, you stare wildly about you for the proper house.<p>\"}]},{\"say\":[{\"value\":\"{Continue...|_intro_next 2}\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"_intro_next 2\"}]},\"then\":{\"travel\":{\"value\":\"_street\"}}}]},\"_street\":{\"description\":{\"value\":\"{A Windy Street|_street}\"},\"do\":[{\"if\":{\"neq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"then\":{\"do\":{\"function\":{\"value\":\"_street_check_dead\"}}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"say\":[{\"value\":\"Imposing houses, most with darkened windows, stand back from the pavement to the right and left of the empty street.<p>\"}]},{\"say\":[{\"value\":\"You see {!!a golden plaque|_right_hand_plaque} hanging from the garden wall next to the {!!gate of the house|_right_hand_gate} to the {!!east|go east}.<p>\"}]},{\"say\":[{\"value\":\"You see {!!another plaque|_left_hand_plaque} similarly placed next to {!!the gate|_left_hand_gate} across the street, to the {!!west|go west}.<p>\"}]},{\"say\":[{\"value\":\"The street continues {!!north|go north}, into the dark.\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _left_hand_plaque\"}]},\"then\":{\"say\":[{\"value\":\"The plaque reads: \\\"380 Mayfair Street\\\"\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _right_hand_plaque\"}]},\"then\":{\"say\":[{\"value\":\"The plaque reads: \\\"381 Mayfair Street\\\"\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go west\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go east\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _left_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _right_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _left_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _right_hand_gate\"}]}],\"then\":{\"say\":[{\"value\":\"The gate is locked.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go north\"}]},\"then\":{\"travel\":{\"value\":\"_street_2\"}}}]},\"_street_2\":{\"description\":{\"value\":\"{Further Down A Windy Street|_street_2}\"},\"do\":[{\"if\":{\"neq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"then\":{\"do\":{\"function\":{\"value\":\"_street_check_dead\"}}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"say\":[{\"value\":\"Two more houses loom out of the darkness of the lonely street.<p>\"}]},{\"say\":[{\"value\":\"You see {!!an address plaque|_right_hand_plaque} by {!!a gate|_right_hand_gate} to the {!!east|go east}.<p>\"}]},{\"say\":[{\"value\":\"And {!!another plaque|_left_hand_plaque} near {!!the gate|_left_hand_gate} to the {!!west|go west}.<p>\"}]},{\"say\":[{\"value\":\"The street continues {!!north|go north}.\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _left_hand_plaque\"}]},\"then\":{\"say\":[{\"value\":\"The plaque reads: \\\"382 Mayfair Street\\\"\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _right_hand_plaque\"}]},\"then\":{\"say\":[{\"value\":\"The plaque reads: \\\"383 Mayfair Street\\\"\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go west\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go east\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _left_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _right_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _left_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _right_hand_gate\"}]}],\"then\":{\"say\":[{\"value\":\"The gate is locked.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go north\"}]},\"then\":{\"travel\":{\"value\":\"_street_3\"}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go south\"}]},\"then\":{\"travel\":{\"value\":\"_street\"}}}]},\"_street_3\":{\"description\":{\"value\":\"{The End Of A Windy Street|_street_3}\"},\"do\":[{\"if\":{\"neq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"then\":{\"do\":{\"function\":{\"value\":\"_street_check_dead\"}}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]}],\"then\":{\"say\":[{\"say\":[{\"value\":\"The street ends here.<p>\"}]},{\"say\":[{\"value\":\"{!!A golden plaque|_right_hand_plaque} hangs near {!!the gate|_right_hand_gate} to the {!!east|go east}.<p>\"}]},{\"say\":[{\"value\":\"{!!Another plaque|_left_hand_plaque} hangs near {!!the gate|_left_hand_gate} to the {!!west|go west}.<p>\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _left_hand_plaque\"}]},\"then\":{\"say\":[{\"value\":\"The plaque reads: \\\"384 Mayfair Street\\\"\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _right_hand_plaque\"}]},\"then\":{\"say\":[{\"value\":\"The plaque reads: \\\"385 Mayfair Street\\\"\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go east\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _right_hand_gate\"}]}],\"then\":{\"travel\":{\"interrupt\":true,\"value\":\"_street_sinclair_front_lawn\"}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go west\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _left_hand_gate\"}]},{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _left_hand_gate\"}]}],\"then\":{\"say\":[{\"value\":\"The gate is locked.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go south\"}]},\"then\":{\"travel\":{\"value\":\"_street_2\"}}}]},\"_street_sinclair_front_lawn\":{\"description\":{\"value\":\"{Front Garden|_street_sinclair_front_lawn}\"},\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]}],\"then\":{\"do\":[{\"if\":{\"eq\":[{\"variable\":\"_street_entered_lawn\"},{\"value\":\"false\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"_street_entered_lawn\"},{\"value\":\"true\"}]},{\"clear\":true},{\"say\":[{\"value\":\"<p>You push open the gate and enter Dr. Sinclair's front garden.<p>\"}]}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_entered_lawn\"},{\"value\":\"true\"}]},\"then\":{\"say\":[{\"value\":\"A gravel path leads from the {!!garden gate|_street_garden_gate} to the {!!west|go west} straight to {!!the front door|_street_front_door} of Dr. Sinclair's house to the {!!east|go east}.\"}]}}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _street_front_door\"}]},\"then\":{\"say\":[{\"value\":\"The door is slightly ajar.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _street_garden_gate\"}]},\"then\":{\"say\":[{\"value\":\"You've shut the gate securely behind you. But how could any mere physical barrier hold back that Horror?\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go west\"}]},\"then\":{\"say\":[{\"value\":\"You can sense It's presence just beyond the gate. Terror freezes your blood as you attempt to move toward it. You don't have the strength.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _street_front_door\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go east\"}]}],\"then\":{\"travel\":{\"value\":\"_house_front_hall\"}}}]},\"_street_death\":{\"description\":{\"value\":\"You Have Died\"},\"do\":[{\"say\":[{\"value\":\"<p>Too long in the open, and without Dr. Sinclar's aid, the horrible shadow has consumed you.<p>\"}]},{\"say\":[{\"value\":\"(Refresh the page to play again)\"}]}]},\"_house_front_hall\":{\"description\":{\"value\":\"{Front Hall|_house_front_hall}\"},\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]}],\"then\":{\"say\":[{\"if\":{\"nin\":[{\"value\":\"_hall_note\"},{\"value\":\"#player\"}]},\"then\":{\"say\":[{\"value\":\"A {!!hastily scrawled note|_hall_note} sits on a small table in the hall.\"}]}},{\"say\":[{\"value\":\"<p>A dark staircase leads {!!up to the second floor|go up}.<p>\"}]},{\"say\":[{\"value\":\"<p>At the {!!east|go east} end of the hall is a door.<p>\"}]},{\"say\":[{\"value\":\"<p>The front door is to the {!!west|go west}.<p>\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go west\"}]},\"then\":{\"travel\":{\"value\":\"_street_sinclair_front_lawn\"}}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go up\"}]},\"then\":{\"travel\":{\"value\":\"_house_upstairs\"}}}]},\"_house_upstairs\":{\"description\":{\"value\":\"{Second Floor Hall|_house_upstairs}\"},\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"#enter\"}]},\"or\":[{\"eq\":[{\"value\":\"#command\"},{\"value\":\"look around\"}]}],\"then\":{\"say\":[{\"say\":[{\"value\":\"A {massive mural|_mural} covers the wall at the top of stairs: {The night sky|_mural_sky}, filled with strange constellations, stretches above a {tumultuous sea|_mural_sea}.\"}]},{\"say\":[{\"value\":\"On the right, a {flaming red sun|_mural_sun} rises out of the waves. On the left, a {pale yellow moon|_mural_moon} sinks behind the haunting silhouette of an island.\"}]},{\"say\":[{\"value\":\"<p>There are doors to the {!!north|go north} and {!!south|go south}.<p>\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go north\"}]},\"then\":{\"do\":[{\"if\":{\"eq\":[{\"variable\":\"_mural_puzzle_solved\"},{\"value\":\"false\"}]},\"then\":{\"say\":[{\"value\":\"The door has no knob, and it won't budge.\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_mural_puzzle_solved\"},{\"value\":\"true\"}]},\"then\":{\"travel\":{\"value\":\"_house_laboratory\"}}}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"go south\"}]},\"then\":{\"say\":[{\"value\":\"The door is locked.\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _mural\"}]},\"then\":{\"say\":[{\"value\":\"Upon closer inspection, you can see that the mural is made up of several large pieces, some of which are slightly raised.<p>\"}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _mural_sky\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"You push against the starry sky and it gives slightly.\"}]},{\"if\":{\"eq\":[{\"variable\":\"_mural_sequence\"},{\"value\":\"0\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"1\"}]},{\"say\":[{\"value\":\"You hear a faint click.\"}]}]},\"else\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"0\"}]},{\"say\":[{\"value\":\"You hear a distant clang.\"}]}]}}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _mural_sea\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"You push against the raging waves and they gives slightly.\"}]},{\"if\":{\"eq\":[{\"variable\":\"_mural_sequence\"},{\"value\":\"1\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"2\"}]},{\"say\":[{\"value\":\"You hear a faint click.\"}]}]},\"else\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"0\"}]},{\"say\":[{\"value\":\"You hear a distant clang.\"}]}]}}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _mural_sun\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"You push against the burning sun and it gives slightly.\"}]},{\"if\":{\"eq\":[{\"variable\":\"_mural_sequence\"},{\"value\":\"2\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"3\"}]},{\"say\":[{\"value\":\"You hear a faint click.\"}]}]},\"else\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"0\"}]},{\"say\":[{\"value\":\"You hear a distant clang.\"}]}]}}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _mural_moon\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"You push against the pale moon and it gives slightly.\"}]},{\"if\":{\"eq\":[{\"variable\":\"_mural_sequence\"},{\"value\":\"3\"}]},\"then\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"4\"}]},{\"set\":[{\"value\":\"_mural_puzzle_solved\"},{\"value\":\"true\"}]},{\"say\":[{\"value\":\"After a series of tapping sounds, the door to the {!!north|go north} swings open.\"}]}]},\"else\":{\"do\":[{\"set\":[{\"value\":\"_mural_sequence\"},{\"value\":\"0\"}]},{\"say\":[{\"value\":\"You hear a distant clang.\"}]}]}}]}}]},\"_house_laboratory\":{\"description\":{\"value\":\"To Be Continued...\"},\"do\":[{\"say\":[{\"value\":\"You enter the shadowy laboratory of Dr. Sinclair...\"}]}]}},\"things\":{\"#player\":{\"location\":\"_intro\"},\"_sinclar_letter\":{\"location\":\"#player\",\"description\":\"{!!a letter from Dr. Walter Sinclar|_sinclar_letter}\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _sinclar_letter\"}]},\"then\":{\"if\":{\"in\":[{\"value\":\"_sinclar_letter\"},{\"value\":\"#player\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"\\\"Dear Mr. Smith<p>\"}]},{\"say\":[{\"value\":\"I have learned of your plight. Make no mistake, you are in grave danger.\"}]},{\"say\":[{\"value\":\"However, I believe I can help you. Come to my home on Mayfair Street at once, number 385.<p>\"}]},{\"say\":[{\"value\":\"Do not delay.\\\"\"}]}]}}}]},\"_hall_note\":{\"location\":\"_house_front_hall\",\"description\":\"{!!a hastily scrawled note|_hall_note}\",\"do\":[{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"examine _hall_note\"}]},\"then\":{\"say\":[{\"say\":[{\"value\":\"\\\"Mr. Smith,<p>\"}]},{\"say\":[{\"value\":\"I could wait no longer for you to arrive. Somehow the Presence has learned of my letter to you and I cannot risk any more delay.\"}]},{\"say\":[{\"value\":\"But rest assured, though the heavens may fall into the depths of the abyss and the rising sun burn the sickly moon, all is not lost.<p>\"}]},{\"say\":[{\"value\":\"Follow me.\\\"\"}]}]}},{\"if\":{\"eq\":[{\"value\":\"#command\"},{\"value\":\"use _hall_note\"}]},\"then\":{\"if\":{\"nin\":[{\"value\":\"_hall_note\"},{\"value\":\"#player\"}]},\"then\":{\"do\":[{\"say\":[{\"value\":\"You take the note.\"}]},{\"move\":[{\"value\":\"_hall_note\"},{\"value\":\"#player\"}]}]}}}]}},\"variables\":{\"_street_num_turns\":{\"value\":\"0\"},\"_street_entered_lawn\":{\"value\":\"false\"},\"_mural_puzzle_solved\":{\"value\":\"false\"},\"_mural_sequence\":{\"value\":\"0\"},\"#turn\":{\"value\":\"1\"}},\"functions\":{\"_street_check_dead\":[{\"set\":[{\"value\":\"_street_num_turns\"},{\"modifier\":{\"operation\":\"add\",\"operand\":{\"value\":\"1\"}},\"variable\":\"_street_num_turns\"}]},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"3\"}]},\"then\":{\"say\":[{\"value\":\"<p>The wind is beginning to howl.<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"6\"}]},\"then\":{\"say\":[{\"value\":\"<p>You sense It drawing near.<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"9\"}]},\"then\":{\"say\":[{\"value\":\"<p>\\\"God save me... It's here...\\\"<p>\"}]}},{\"if\":{\"eq\":[{\"variable\":\"_street_num_turns\"},{\"value\":\"10\"}]},\"then\":{\"do\":[{\"clear\":true},{\"travel\":{\"interrupt\":true,\"value\":\"_street_death\"}}]}}]},\"settings\":{\"keywords\":[{\"keyword\":\"use\"},{\"keyword\":\"examine\"},{\"keyword\":\"look around\"},{\"keyword\":\"{inventory|check inventory}\"},{\"keyword\":\"{north|go north}\"},{\"keyword\":\"{south|go south}\"},{\"keyword\":\"{east|go east}\"},{\"keyword\":\"{west|go west}\"}]}}";
 
 
 /***/ }),
