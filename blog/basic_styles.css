@@ -1,0 +1,45 @@
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	
+}
+body {
+	background-color: #333333;
+}
+
+.content {
+	color: #333333;
+	font-family: 'Helvetica', sans-serif;
+	background-color: #F1F1D4;
+
+	max-width: 800px;
+	height: 100%;
+	margin: 0 auto 15px auto;
+	padding: 5px 15px 15px 15px;
+}
+
+.content header h1 {
+	margin-bottom: 0;
+}
+
+.content header .links {
+	font-size: 0.8em;
+	
+	padding-top: 10px;
+	padding-bottom: 10px;
+	
+	border-top: 1px solid #333333;
+	border-bottom: 1px solid #333333;
+}
+
+.content header .links .link {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.content header h4 {
+	margin-top: 0;
+}
+
