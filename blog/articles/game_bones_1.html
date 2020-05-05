@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../basic_styles.css">
+	</head>
+	<body>
+		<div class="content">
+			<header>
+				<h1>File Descriptor 1</h2>
+				<h4>A weblog about computer game development</h4>
+				<div class="links">
+					<a class="link" href="../index.html">Home</a>
+					<a class="link" href="../about.html">About</a>
+					<a class="link" href="../contact.html">Contact</a>
+				</div>
+			</header>
+			
+			<section>
+				<h3>Game Bones: Basic Movement</h3>
+				<p>I codified goal #1 of <a href="./game_bones_0.html" target="_blank">my little project</a> as follows:</p>
+				<blockquote>
+				"A character that moves in response to player input. Movement should consist of several states with a speeding up phase, constant top speed, and slowing down phase (See <a href="https://media.giphy.com/media/11tQtCnXLJXcPu/giphy.gif" target="_blank">Prince of Persia</a>)."
+				</blockquote>
+				<p>
+					I’ve successfully implemented this both in Unity and using my own C code + SDL2. As you can see, they are pretty close.
+				</p>
+				<h4>Unity:</h4> 
+				<div><video width="100%" src="../media/unity_dino_move.mp4" type="video/mp4" controls preload="auto"></div>
+				<h4>Game Bones:</h4>
+				<div><video width="100%" src="../media/game_bones_dino_move.mp4" type="video/mp4" controls preload="auto"></div>
+				<p>
+					There’s a basic state machine for the player with animations tied directly to the states (idle, walk, run, slow down) and some basic input handling. Currently there’s no gravity, collision detection, etc. In Unity I’m just calling transform.Translate() and keeping track of my own velocity and acceleration variables.
+				</p>
+				<p>
+					This made it very easy to “port” from Unity into the C project because, of course, I’ll always have to keep track of everything myself in the C project. I expect parity between the projects to become more difficult from now on. The next goal is jumping and some collision detection with static obstacles. I plan to leverage Unity’s physics system for that, but I also don’t plan to implement anything like a full physics simulation in Game Bones. I don’t need one for this.
+				</p>
+				<h4>Project stats</h4>
+				<table>
+					<thead>
+						<th></th><th>Game Bones</th><th>Unity</th>
+					</thead>
+					<tbody>
+						<tr style="text-align: right">
+							<td>Size</td>
+							<td>2.66 mb</td>
+							<td>47.00 mb</td>
+						</tr>
+						<tr>
+							<td>Frame rate*</td>
+							<td>~4500 to ~5200 fps</td>
+							<td>~2800 to ~4800 fps</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+		
+			<footer>
+				* This is a crude measurement taken using delta time and printed to the console (in the C project) or displayed in a UI text element (in Unity). I don’t claim a great deal of accuracy here or an exact apples to apples comparison. For instance, Game Bones was not updating / rendering a text element. It is interesting to note though that the Unity frame rate, while comparable to Game Bones, fluctuated a lot more wildly.
+			</footer>
+		</div>
+	</body>
+</html>
