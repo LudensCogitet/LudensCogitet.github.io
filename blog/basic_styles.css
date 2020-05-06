@@ -43,6 +43,15 @@ body {
 	margin-top: 0;
 }
 
+.turn-page-links {
+	margin-top: 15px;
+}
+
+.turn-page-links.border {
+	padding-top: 15px;
+	border-top: 1px solid #333333;
+}
+
 ul li {
 	margin-bottom: 5px;
 }
